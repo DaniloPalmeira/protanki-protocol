@@ -1,0 +1,21 @@
+{
+  "name": "protanki-protocol",
+  "version": "0.1.0",
+  "description": "Shared wire-protocol codec and packet definitions for letanki-server and protanki-bridge",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w",
+    "test": "node --test dist/**/*.test.js",
+    "prepare": "tsc"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "typescript": "^5.4.0"
+  }
+}
