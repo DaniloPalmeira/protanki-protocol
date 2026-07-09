@@ -206,11 +206,11 @@ export const SetBattleInviteSound = def({
 
 // Codec manual no server (montagem field-by-field com ResourceManager em runtime;
 // read lança). Opaco para o bridge por enquanto.
-export const InitUserClanModels: PacketDef = {
+export const InitUserClanModels = def({
     id: -1338449818,
     name: "InitUserClanModels",
     direction: "s2c",
-};
+});
 
 export const OnReserveSlotTeam = def({
     id: -169305322,

@@ -1,6 +1,7 @@
 import { readSchema, writeSchema } from "../schema/serializer";
 import { defById } from "../registry/registry";
 import { PacketDef } from "../registry/packet-def";
+import type { AnyPacket } from "../any-packet";
 
 /** Result of a read: packet id, name (when known) and the decoded fields. */
 export interface DecodedPacket<F = Record<string, any>> {
@@ -42,15 +43,18 @@ export function encodeBody(target: number | PacketDef<any>, fields: any = {}): B
 }
 
 /**
- * Decode a WHOLE packet (int32 id + body). Not typed per-field because the id is only known at
- * runtime — use `decodeBody(def, ...)` when you want the fields typed.
+ * Decode a WHOLE packet (int32 id + body). Returns a DISCRIMINATED UNION (`AnyPacket`): the id is
+ * only known at runtime, so narrow by `name` to get the fields typed.
+ *
+ *   const pkt = decode(buffer);
+ *   if (pkt.name === "Login") pkt.fields.username;  // string | null
  */
-export function decode(buffer: Buffer): DecodedPacket {
+export function decode(buffer: Buffer): AnyPacket {
     const id = buffer.readInt32BE(0);
     const d = defById(id);
     const fields: Record<string, any> = {};
     if (d?.schema) readSchema(fields, d.schema, buffer.subarray(4));
-    return { id, name: d?.name ?? null, fields };
+    return { id, name: d?.name ?? null, fields } as AnyPacket;
 }
 
 /**
