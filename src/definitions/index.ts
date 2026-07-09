@@ -15,3 +15,5 @@ export * as shop from "./shop.defs";
 export * as social from "./social.defs";
 export * as system from "./system.defs";
 export * as security from "./security.defs";
+export * as clan from "./clan.defs";
+export * as weapons from "./weapons.defs";

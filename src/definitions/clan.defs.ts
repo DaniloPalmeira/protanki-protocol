@@ -1,0 +1,78 @@
+import { PacketDef } from "../registry/packet-def";
+import { PacketSchema } from "../schema/types";
+
+// Clã. Muitos pacotes usam codec manual no server (ClanView/MemberModel, Long de 8 bytes,
+// vetores com presence byte). Schemas simples estão descritos para o bridge; os agregados
+// complexos ficam opacos (schema ausente) — o bridge ainda os identifica por nome.
+
+const USER: PacketSchema = [{ name: "username", type: "string" }];
+const TAG: PacketSchema = [{ name: "tag", type: "string" }];
+const NAME: PacketSchema = [{ name: "name", type: "string" }];
+
+export const KickClanMember: PacketDef = { id: 459991202, name: "KickClanMember", direction: "c2s", schema: USER };
+export const SetClanMemberPosition: PacketDef = { id: 90109270, name: "SetClanMemberPosition", direction: "c2s", schema: [{ name: "username", type: "string" }, { name: "position", type: "i32" }] };
+export const SetClanLogo: PacketDef = { id: 99387765, name: "SetClanLogo", direction: "c2s", schema: [{ name: "image", type: "bytes" }] };
+export const LeaveClan: PacketDef = { id: -1298483664, name: "LeaveClan", direction: "c2s", schema: [] };
+export const ClanPermissions: PacketDef = { id: -453603415, name: "ClanPermissions", direction: "s2c", schema: [{ name: "flags", type: "list", of: [{ name: "flag", type: "i32" }] }] };
+export const ClanCooldown: PacketDef = { id: -745085341, name: "ClanCooldown", direction: "s2c", schema: [{ name: "seconds", type: "i32" }] };
+export const RemoveClanMember: PacketDef = { id: 1039356886, name: "RemoveClanMember", direction: "s2c", schema: USER };
+export const MemberStatusNotify: PacketDef = { id: 1059383280, name: "MemberStatusNotify", direction: "s2c", schema: USER };
+export const MarkMemberSeen: PacketDef = { id: -1922978824, name: "MarkMemberSeen", direction: "c2s", schema: USER };
+export const OpenMyClanWindow: PacketDef = { id: 2073319841, name: "OpenMyClanWindow", direction: "c2s", schema: [] };
+export const NotifyJoinRequest: PacketDef = { id: 1321902609, name: "NotifyJoinRequest", direction: "s2c", schema: USER };
+export const AddJoinRequest: PacketDef = { id: 273571175, name: "AddJoinRequest", direction: "s2c", schema: USER };
+export const AcceptJoinRequest: PacketDef = { id: -2875943, name: "AcceptJoinRequest", direction: "c2s", schema: USER };
+export const SelectJoinRequest: PacketDef = { id: -344258352, name: "SelectJoinRequest", direction: "c2s", schema: USER };
+export const DeclineAllJoinRequests: PacketDef = { id: -304905793, name: "DeclineAllJoinRequests", direction: "c2s", schema: [] };
+export const DeclineJoinRequest: PacketDef = { id: 1327826221, name: "DeclineJoinRequest", direction: "c2s", schema: USER };
+export const JoinRequestDeclined: PacketDef = { id: -1735563082, name: "JoinRequestDeclined", direction: "s2c", schema: USER };
+export const RemoveJoinRequest: PacketDef = { id: 1452773298, name: "RemoveJoinRequest", direction: "s2c", schema: USER };
+export const ShowNotInClanPanel: PacketDef = { id: -1123511676, name: "ShowNotInClanPanel", direction: "c2s", schema: [] };
+export const CloseClanWindow: PacketDef = { id: 924070374, name: "CloseClanWindow", direction: "both", schema: [] };
+export const HideNotInClanPanel: PacketDef = { id: -2002206647, name: "HideNotInClanPanel", direction: "c2s", schema: [] };
+export const GetClanRatingsData: PacketDef = { id: -2080893689, name: "GetClanRatingsData", direction: "c2s", schema: [{ name: "startIndex", type: "i32" }, { name: "count", type: "i32" }] };
+export const SetClanRatingsData: PacketDef = { id: 134406915, name: "SetClanRatingsData", direction: "s2c" };
+export const ShowForeignClan: PacketDef = { id: 947733823, name: "ShowForeignClan", direction: "c2s", schema: TAG };
+export const CreateClan: PacketDef = { id: -1267250495, name: "CreateClan", direction: "c2s", schema: [{ name: "name", type: "string" }, { name: "tag", type: "string" }] };
+export const CheckClanTag: PacketDef = { id: -1879289905, name: "CheckClanTag", direction: "c2s", schema: TAG };
+export const CheckClanName: PacketDef = { id: 1591528838, name: "CheckClanName", direction: "c2s", schema: NAME };
+export const CheckInviteUser: PacketDef = { id: 819097883, name: "CheckInviteUser", direction: "c2s", schema: USER };
+export const InviteUserValid: PacketDef = { id: 1796904481, name: "InviteUserValid", direction: "s2c", schema: [] };
+export const InviteUserInvalid: PacketDef = { id: -616439158, name: "InviteUserInvalid", direction: "s2c", schema: [] };
+export const SetClanDescription: PacketDef = { id: -1752335888, name: "SetClanDescription", direction: "both", schema: [{ name: "description", type: "string" }] };
+export const SetClanMinRank: PacketDef = { id: -1145619463, name: "SetClanMinRank", direction: "c2s", schema: [{ name: "minRank", type: "i8" }] };
+export const SetClanRecruiting: PacketDef = { id: -614563927, name: "SetClanRecruiting", direction: "c2s", schema: [{ name: "recruiting", type: "bool" }] };
+export const SendClanInvite: PacketDef = { id: -2053489715, name: "SendClanInvite", direction: "c2s", schema: USER };
+export const ClanInviteSentAck: PacketDef = { id: 1921140979, name: "ClanInviteSentAck", direction: "s2c", schema: USER };
+export const CancelClanInvite: PacketDef = { id: 2041223590, name: "CancelClanInvite", direction: "c2s", schema: USER };
+export const ClanInviteCancelledAck: PacketDef = { id: 112423798, name: "ClanInviteCancelledAck", direction: "s2c", schema: USER };
+export const ViewInviteClan: PacketDef = { id: 405171321, name: "ViewInviteClan", direction: "c2s", schema: TAG };
+export const ViewInviteClanResponse: PacketDef = { id: 781410259, name: "ViewInviteClanResponse", direction: "s2c", schema: TAG };
+export const AcceptClanInvite: PacketDef = { id: 1533026019, name: "AcceptClanInvite", direction: "c2s", schema: TAG };
+export const DeclineClanInvite: PacketDef = { id: 1010729260, name: "DeclineClanInvite", direction: "c2s", schema: TAG };
+export const ClanInviteNotify: PacketDef = { id: 134379747, name: "ClanInviteNotify", direction: "s2c", schema: TAG };
+export const ClanInviteAck: PacketDef = { id: 1901058987, name: "ClanInviteAck", direction: "s2c", schema: TAG };
+export const JoinClanRequest: PacketDef = { id: -1137965580, name: "JoinClanRequest", direction: "c2s", schema: TAG };
+export const SearchClanByName: PacketDef = { id: -378947621, name: "SearchClanByName", direction: "c2s", schema: NAME };
+export const ClanSearchFound: PacketDef = { id: 1726541163, name: "ClanSearchFound", direction: "s2c", schema: [] };
+export const ClanSearchUnavailable: PacketDef = { id: -866005248, name: "ClanSearchUnavailable", direction: "s2c", schema: [] };
+export const JoinClanByName: PacketDef = { id: -705969616, name: "JoinClanByName", direction: "c2s", schema: NAME };
+export const CancelJoinClanRequest: PacketDef = { id: 1913571122, name: "CancelJoinClanRequest", direction: "c2s", schema: TAG };
+export const CancelJoinRequestFromModal: PacketDef = { id: -930926299, name: "CancelJoinRequestFromModal", direction: "c2s", schema: TAG };
+export const MyClanWindow: PacketDef = { id: -8296541, name: "MyClanWindow", direction: "s2c" };
+export const ClanTagNotify: PacketDef = { id: -88976442, name: "ClanTagNotify", direction: "s2c", schema: TAG };
+export const ClanNameNotify: PacketDef = { id: -1673544562, name: "ClanNameNotify", direction: "s2c", schema: NAME };
+export const AddClanMember: PacketDef = { id: 1741285576, name: "AddClanMember", direction: "s2c" };
+export const MemberAddedNotify: PacketDef = { id: 385150953, name: "MemberAddedNotify", direction: "s2c", schema: USER };
+export const ClanLeaderNotify: PacketDef = { id: -915300943, name: "ClanLeaderNotify", direction: "s2c", schema: [{ name: "nick", type: "string" }] };
+export const JoinRequestModel: PacketDef = { id: 325031295, name: "JoinRequestModel", direction: "s2c" };
+export const JoinRequestSent: PacketDef = { id: -905757704, name: "JoinRequestSent", direction: "s2c", schema: TAG };
+export const JoinRequestCancelled: PacketDef = { id: -2007179326, name: "JoinRequestCancelled", direction: "s2c", schema: TAG };
+export const ClanTagAvailable: PacketDef = { id: -965581529, name: "ClanTagAvailable", direction: "s2c", schema: [] };
+export const ClanTagTaken: PacketDef = { id: 1873830541, name: "ClanTagTaken", direction: "s2c", schema: [] };
+export const ClanNameAvailable: PacketDef = { id: -148282578, name: "ClanNameAvailable", direction: "s2c", schema: [] };
+export const ClanNameTaken: PacketDef = { id: -253044119, name: "ClanNameTaken", direction: "s2c", schema: [] };
+export const ShowNotInClanWindow: PacketDef = { id: 560344632, name: "ShowNotInClanWindow", direction: "s2c", schema: [{ name: "intro", type: "resource" }, { name: "card", type: "resource" }] };
+export const ShowForeignClanWindow: PacketDef = { id: -1855118498, name: "ShowForeignClanWindow", direction: "s2c" };
+export const OpenClanMissions: PacketDef = { id: -2127613673, name: "OpenClanMissions", direction: "c2s", schema: [] };
+export const ShowClanMissions: PacketDef = { id: 1720177051, name: "ShowClanMissions", direction: "s2c" };
