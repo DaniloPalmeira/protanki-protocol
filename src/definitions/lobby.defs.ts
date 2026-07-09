@@ -1,29 +1,29 @@
-import { PacketDef } from "../registry/packet-def";
+import { PacketDef, def } from "../registry/packet-def";
 
 // Lobby: lista de batalhas, criação, seleção e roster de batalha (DM e times).
 
-export const BattleInfo: PacketDef = {
+export const BattleInfo = def({
     id: -838186985,
     name: "BattleInfo",
     direction: "s2c",
     schema: [{ name: "jsonData", type: "string" }],
-};
+});
 
-export const BattleList: PacketDef = {
+export const BattleList = def({
     id: 552006706,
     name: "BattleList",
     direction: "s2c",
     schema: [{ name: "jsonData", type: "string" }],
-};
+});
 
-export const BattleDetails: PacketDef = {
+export const BattleDetails = def({
     id: 546722394,
     name: "BattleDetails",
     direction: "s2c",
     schema: [{ name: "jsonData", type: "string" }],
-};
+});
 
-export const CreateBattleRequest: PacketDef = {
+export const CreateBattleRequest = def({
     id: -2135234426,
     name: "CreateBattleRequest",
     direction: "c2s",
@@ -58,45 +58,45 @@ export const CreateBattleRequest: PacketDef = {
         { name: "randomGold", type: "bool" },
         { name: "dependentCooldownEnabled", type: "bool" },
     ],
-};
+});
 
-export const CreateBattleResponse: PacketDef = {
+export const CreateBattleResponse = def({
     id: 802300608,
     name: "CreateBattleResponse",
     direction: "s2c",
     schema: [{ name: "jsonData", type: "string" }],
-};
+});
 
 // Codec manual no server (faz .trim() no battleId lido). Schema para o bridge.
-export const SelectBattle: PacketDef = {
+export const SelectBattle = def({
     id: 2092412133,
     name: "SelectBattle",
     direction: "c2s",
     schema: [{ name: "battleId", type: "string" }],
-};
+});
 
-export const RequestBattleByLink: PacketDef = {
+export const RequestBattleByLink = def({
     id: -604091695,
     name: "RequestBattleByLink",
     direction: "c2s",
     schema: [{ name: "battleId", type: "string" }],
-};
+});
 
-export const ValidateBattleNameRequest: PacketDef = {
+export const ValidateBattleNameRequest = def({
     id: 566652736,
     name: "ValidateBattleNameRequest",
     direction: "c2s",
     schema: [{ name: "name", type: "string" }],
-};
+});
 
-export const ValidateBattleNameResponse: PacketDef = {
+export const ValidateBattleNameResponse = def({
     id: 120401338,
     name: "ValidateBattleNameResponse",
     direction: "s2c",
     schema: [{ name: "name", type: "string" }],
-};
+});
 
-export const LobbyData: PacketDef = {
+export const LobbyData = def({
     id: 907073245,
     name: "LobbyData",
     direction: "s2c",
@@ -114,16 +114,16 @@ export const LobbyData: PacketDef = {
         { name: "nickname", type: "string" },
         { name: "userProfileUrl", type: "string" },
     ],
-};
+});
 
-export const UserNotInBattle: PacketDef = {
+export const UserNotInBattle = def({
     id: 1941694508,
     name: "UserNotInBattle",
     direction: "s2c",
     schema: [{ name: "nickname", type: "string" }],
-};
+});
 
-export const ReleasePlayerSlotDm: PacketDef = {
+export const ReleasePlayerSlotDm = def({
     id: 504016996,
     name: "ReleasePlayerSlotDm",
     direction: "s2c",
@@ -131,9 +131,9 @@ export const ReleasePlayerSlotDm: PacketDef = {
         { name: "battleId", type: "string" },
         { name: "nickname", type: "string" },
     ],
-};
+});
 
-export const ReservePlayerSlotDm: PacketDef = {
+export const ReservePlayerSlotDm = def({
     id: -2133657895,
     name: "ReservePlayerSlotDm",
     direction: "s2c",
@@ -141,9 +141,9 @@ export const ReservePlayerSlotDm: PacketDef = {
         { name: "battleId", type: "string" },
         { name: "nickname", type: "string" },
     ],
-};
+});
 
-export const AddUserToBattleDm: PacketDef = {
+export const AddUserToBattleDm = def({
     id: -911626491,
     name: "AddUserToBattleDm",
     direction: "s2c",
@@ -154,9 +154,9 @@ export const AddUserToBattleDm: PacketDef = {
         { name: "suspicious", type: "bool" },
         { name: "nickname", type: "string" },
     ],
-};
+});
 
-export const RemoveUserFromBattleLobby: PacketDef = {
+export const RemoveUserFromBattleLobby = def({
     id: 1924874982,
     name: "RemoveUserFromBattleLobby",
     direction: "s2c",
@@ -164,9 +164,9 @@ export const RemoveUserFromBattleLobby: PacketDef = {
         { name: "battleId", type: "string" },
         { name: "nickname", type: "string" },
     ],
-};
+});
 
-export const NotifyFriendOfBattle: PacketDef = {
+export const NotifyFriendOfBattle = def({
     id: -1895446889,
     name: "NotifyFriendOfBattle",
     direction: "s2c",
@@ -181,28 +181,28 @@ export const NotifyFriendOfBattle: PacketDef = {
         { name: "serverNumber", type: "i32" },
         { name: "nickname", type: "string" },
     ],
-};
+});
 
-export const UnloadBattleList: PacketDef = {
+export const UnloadBattleList = def({
     id: -324155151,
     name: "UnloadBattleList",
     direction: "s2c",
     schema: [],
-};
+});
 
-export const RequestLobby: PacketDef = {
+export const RequestLobby = def({
     id: 1452181070,
     name: "RequestLobby",
     direction: "c2s",
     schema: [],
-};
+});
 
-export const SetBattleInviteSound: PacketDef = {
+export const SetBattleInviteSound = def({
     id: 834877801,
     name: "SetBattleInviteSound",
     direction: "s2c",
     schema: [{ name: "soundIdLow", type: "resource" }],
-};
+});
 
 // Codec manual no server (montagem field-by-field com ResourceManager em runtime;
 // read lança). Opaco para o bridge por enquanto.
@@ -212,7 +212,7 @@ export const InitUserClanModels: PacketDef = {
     direction: "s2c",
 };
 
-export const OnReserveSlotTeam: PacketDef = {
+export const OnReserveSlotTeam = def({
     id: -169305322,
     name: "OnReserveSlotTeam",
     direction: "s2c",
@@ -221,9 +221,9 @@ export const OnReserveSlotTeam: PacketDef = {
         { name: "nickname", type: "string" },
         { name: "team", type: "i32" },
     ],
-};
+});
 
-export const OnReleaseSlotTeam: PacketDef = {
+export const OnReleaseSlotTeam = def({
     id: 1447204641,
     name: "OnReleaseSlotTeam",
     direction: "s2c",
@@ -231,9 +231,9 @@ export const OnReleaseSlotTeam: PacketDef = {
         { name: "battleId", type: "string" },
         { name: "nickname", type: "string" },
     ],
-};
+});
 
-export const AddUserTeam: PacketDef = {
+export const AddUserTeam = def({
     id: 118447426,
     name: "AddUserTeam",
     direction: "s2c",
@@ -245,9 +245,9 @@ export const AddUserTeam: PacketDef = {
         { name: "nickname", type: "string" },
         { name: "team", type: "i32" },
     ],
-};
+});
 
-export const UpdateUserScore: PacketDef = {
+export const UpdateUserScore = def({
     id: -375282889,
     name: "UpdateUserScore",
     direction: "s2c",
@@ -256,30 +256,30 @@ export const UpdateUserScore: PacketDef = {
         { name: "nickname", type: "string" },
         { name: "score", type: "i32" },
     ],
-};
+});
 
-export const HideBattleInfo: PacketDef = {
+export const HideBattleInfo = def({
     id: -602527073,
     name: "HideBattleInfo",
     direction: "s2c",
     schema: [{ name: "battleId", type: "string" }],
-};
+});
 
-export const RemoveBattleFromList: PacketDef = {
+export const RemoveBattleFromList = def({
     id: -1848001147,
     name: "RemoveBattleFromList",
     direction: "s2c",
     schema: [{ name: "battleId", type: "string" }],
-};
+});
 
-export const RoundFinish: PacketDef = {
+export const RoundFinish = def({
     id: 1534651002,
     name: "RoundFinish",
     direction: "s2c",
     schema: [{ name: "battleId", type: "string" }],
-};
+});
 
-export const UpdateTeamScore: PacketDef = {
+export const UpdateTeamScore = def({
     id: 1428217189,
     name: "UpdateTeamScore",
     direction: "s2c",
@@ -288,4 +288,4 @@ export const UpdateTeamScore: PacketDef = {
         { name: "team", type: "i32" },
         { name: "score", type: "i32" },
     ],
-};
+});

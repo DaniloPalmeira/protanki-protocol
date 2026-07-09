@@ -1,63 +1,69 @@
 import { readSchema, writeSchema } from "../schema/serializer";
 import { defById } from "../registry/registry";
+import { PacketDef } from "../registry/packet-def";
 
-/** Resultado de uma leitura: id do pacote, nome (se conhecido) e os campos decodificados. */
-export interface DecodedPacket {
+/** Result of a read: packet id, name (when known) and the decoded fields. */
+export interface DecodedPacket<F = Record<string, any>> {
     id: number;
     name: string | null;
-    fields: Record<string, any>;
+    fields: F;
+}
+
+function bodyOf(id: number, fields: Record<string, any>): Buffer {
+    const d = defById(id);
+    if (!d) throw new Error(`unknown packet: ${id}`);
+    if (!d.schema) throw new Error(`packet ${d.name} (${id}) is opaque (no schema) — use the manual codec`);
+    return writeSchema(fields, d.schema);
 }
 
 /**
- * escrever: monta um pacote COMPLETO (int32 id + corpo) a partir do id e dos campos.
- * Lança se o id for desconhecido ou se o pacote for opaco (sem schema declarativo).
+ * Encode a WHOLE packet (int32 id + body).
+ * Typed when given the definition; untyped when given the raw id.
  *
- *   escrever(defs.auth.Login.id, { username, password, rememberMe }) => Buffer
+ *   encode(defs.auth.Login, { username, password, rememberMe }) => Buffer   (fields checked)
+ *   encode(defs.auth.Login.id, { ... })                         => Buffer   (Record<string, any>)
  */
-export function escrever(id: number, fields: Record<string, any> = {}): Buffer {
-    const def = defById(id);
-    if (!def) throw new Error(`pacote desconhecido: ${id}`);
-    if (!def.schema) throw new Error(`pacote ${def.name} (${id}) é opaco (sem schema) — use o codec manual`);
-    const body = writeSchema(fields, def.schema);
+export function encode<F>(def: PacketDef<F>, fields: F): Buffer;
+export function encode(id: number, fields?: Record<string, any>): Buffer;
+export function encode(target: number | PacketDef<any>, fields: any = {}): Buffer {
+    const id = typeof target === "number" ? target : target.id;
+    const body = bodyOf(id, fields);
     const head = Buffer.alloc(4);
     head.writeInt32BE(id, 0);
     return Buffer.concat([head, body]);
 }
 
+/** Encode only the BODY (when the transport writes the id) — same typing as `encode`. */
+export function encodeBody<F>(def: PacketDef<F>, fields: F): Buffer;
+export function encodeBody(id: number, fields?: Record<string, any>): Buffer;
+export function encodeBody(target: number | PacketDef<any>, fields: any = {}): Buffer {
+    const id = typeof target === "number" ? target : target.id;
+    return bodyOf(id, fields);
+}
+
 /**
- * ler: decodifica um pacote COMPLETO (int32 id + corpo) em { id, name, fields }.
- * Se o id não tiver schema, `fields` volta vazio (mas o id/nome ainda são resolvidos).
- *
- *   ler(buffer) => { id: -739684591, name: "Login", fields: { username, password, rememberMe } }
+ * Decode a WHOLE packet (int32 id + body). Not typed per-field because the id is only known at
+ * runtime — use `decodeBody(def, ...)` when you want the fields typed.
  */
-export function ler(buffer: Buffer): DecodedPacket {
+export function decode(buffer: Buffer): DecodedPacket {
     const id = buffer.readInt32BE(0);
-    const def = defById(id);
+    const d = defById(id);
     const fields: Record<string, any> = {};
-    if (def?.schema) readSchema(fields, def.schema, buffer.subarray(4));
-    return { id, name: def?.name ?? null, fields };
+    if (d?.schema) readSchema(fields, d.schema, buffer.subarray(4));
+    return { id, name: d?.name ?? null, fields };
 }
 
 /**
- * Variante SÓ-CORPO: quando o transporte já separou o id (como no letanki-server e no
- * protanki-bridge, onde o framing lê o id antes). Retorna/consome apenas o corpo do pacote.
+ * Decode only the BODY (id already stripped by the transport). Typed when given the definition:
+ *
+ *   const { fields } = decodeBody(defs.auth.Login, body);   // fields: { username: string | null; ... }
  */
-export function escreverCorpo(id: number, fields: Record<string, any> = {}): Buffer {
-    const def = defById(id);
-    if (!def) throw new Error(`pacote desconhecido: ${id}`);
-    if (!def.schema) throw new Error(`pacote ${def.name} (${id}) é opaco (sem schema) — use o codec manual`);
-    return writeSchema(fields, def.schema);
-}
-
-export function lerCorpo(id: number, body: Buffer): DecodedPacket {
-    const def = defById(id);
+export function decodeBody<F>(def: PacketDef<F>, body: Buffer): DecodedPacket<F>;
+export function decodeBody(id: number, body: Buffer): DecodedPacket;
+export function decodeBody(target: number | PacketDef<any>, body: Buffer): DecodedPacket<any> {
+    const id = typeof target === "number" ? target : target.id;
+    const d = defById(id);
     const fields: Record<string, any> = {};
-    if (def?.schema) readSchema(fields, def.schema, body);
-    return { id, name: def?.name ?? null, fields };
+    if (d?.schema) readSchema(fields, d.schema, body);
+    return { id, name: d?.name ?? null, fields };
 }
-
-// Aliases em inglês, para quem preferir.
-export const encode = escrever;
-export const decode = ler;
-export const encodeBody = escreverCorpo;
-export const decodeBody = lerCorpo;
