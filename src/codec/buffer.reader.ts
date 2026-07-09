@@ -12,6 +12,11 @@ export class BufferReader {
     return this.offset < this.buffer.length;
   }
 
+  /** Bytes consumed so far (útil para detectar payload maior que o schema). */
+  public get position(): number {
+    return this.offset;
+  }
+
   private checkCanRead(length: number): void {
     if (this.offset + length > this.buffer.length) {
       throw new Error("Attempt to read beyond buffer bounds.");

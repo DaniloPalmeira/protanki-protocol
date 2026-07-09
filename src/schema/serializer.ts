@@ -106,3 +106,15 @@ export function writeSchema(source: Record<string, any>, schema: PacketSchema): 
     writeInto(source, schema, writer);
     return writer.getBuffer();
 }
+
+/**
+ * Lê `buffer` conforme `schema` e retorna os campos + quantos bytes foram consumidos.
+ * `bytesRead < buffer.length` indica payload maior que o schema (schema incompleto) —
+ * usado pelo protanki-bridge para sinalizar defs a completar.
+ */
+export function decodeSchema(schema: PacketSchema, buffer: Buffer): { result: Record<string, any>; bytesRead: number } {
+    const reader = new BufferReader(buffer);
+    const result: Record<string, any> = {};
+    readInto(result, schema, reader);
+    return { result, bytesRead: reader.position };
+}

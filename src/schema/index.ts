@@ -5,4 +5,4 @@ export {
   SchemaField,
   PacketSchema,
 } from "./types";
-export { readSchema, writeSchema } from "./serializer";
+export { readSchema, writeSchema, decodeSchema } from "./serializer";
