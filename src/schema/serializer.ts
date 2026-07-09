@@ -7,6 +7,7 @@ const READERS: Record<PrimitiveType, (r: BufferReader) => unknown> = {
     i8: (r) => r.readInt8(),
     i16: (r) => r.readInt16BE(),
     i32: (r) => r.readInt32BE(),
+    i64: (r) => r.readInt64BE(),
     f32: (r) => r.readFloatBE(),
     bool: (r) => r.readUInt8() === 1,
     resource: (r) => r.readResource(),
@@ -24,6 +25,7 @@ const WRITERS: Record<PrimitiveType, (w: BufferWriter, value: any) => void> = {
     i8: (w, v) => w.writeInt8(v),
     i16: (w, v) => w.writeInt16BE(v),
     i32: (w, v) => w.writeInt32BE(v),
+    i64: (w, v) => w.writeInt64BE(v),
     f32: (w, v) => w.writeFloatBE(v),
     bool: (w, v) => w.writeUInt8(v ? 1 : 0),
     resource: (w, v) => w.writeResource(v),
@@ -117,4 +119,64 @@ export function decodeSchema(schema: PacketSchema, buffer: Buffer): { result: Re
     const result: Record<string, any> = {};
     readInto(result, schema, reader);
     return { result, bytesRead: reader.position };
+}
+
+// --- Codec compilado (monomórfico) -------------------------------------------------------------
+
+// Expressão de leitura por tipo, referenciando o reader `r`.
+const READ_SRC: Record<PrimitiveType, string> = {
+    u8: "r.readUInt8()", i8: "r.readInt8()", i16: "r.readInt16BE()", i32: "r.readInt32BE()",
+    i64: "r.readInt64BE()", f32: "r.readFloatBE()", bool: "r.readUInt8()===1", resource: "r.readResource()",
+    string: "r.readOptionalString()", stringArray: "r.readStringArray()", optStringArray: "r.readStringArray()",
+    i16Array: "r.readInt16Array()", vector3: "r.readOptionalVector3()", vector3Array: "r.readVector3Array()",
+    bytes: "r.readBytes(r.readInt32BE())",
+};
+
+// Statement de escrita por tipo, referenciando o writer `w` e o campo `s[n]` (n = literal do nome).
+const WRITE_SRC: Record<PrimitiveType, (n: string) => string> = {
+    u8: (n) => `w.writeUInt8(s[${n}])`, i8: (n) => `w.writeInt8(s[${n}])`, i16: (n) => `w.writeInt16BE(s[${n}])`,
+    i32: (n) => `w.writeInt32BE(s[${n}])`, i64: (n) => `w.writeInt64BE(s[${n}])`, f32: (n) => `w.writeFloatBE(s[${n}])`,
+    bool: (n) => `w.writeUInt8(s[${n}]?1:0)`, resource: (n) => `w.writeResource(s[${n}])`,
+    string: (n) => `w.writeOptionalString(s[${n}])`, stringArray: (n) => `w.writeStringArray(s[${n}])`,
+    optStringArray: (n) => `w.writeOptionalStringArray(s[${n}])`, i16Array: (n) => `w.writeInt16Array(s[${n}])`,
+    vector3: (n) => `w.writeOptionalVector3(s[${n}])`, vector3Array: (n) => `w.writeVector3Array(s[${n}])`,
+    bytes: (n) => `w.writeInt32BE(s[${n}].length);w.writeBuffer(s[${n}])`,
+};
+
+export interface CompiledCodec {
+    read(buffer: Buffer): Record<string, any>;
+    write(fields: Record<string, any>): Buffer;
+}
+
+/**
+ * Gera um codec MONOMÓRFICO (read/write) especializado para `schema`. Para schemas planos (só
+ * primitivos — caso dos pacotes de alta frequência como movimento) faz codegen com nomes de campo
+ * e chamadas fixos, evitando os sites megamórficos do serializer reflexivo. Schemas com compostos
+ * (list/object/optObject) caem no codec reflexivo. Byte-idêntico a `readSchema`/`writeSchema`.
+ */
+export function compileCodec(schema: PacketSchema): CompiledCodec {
+    const flat = schema.every((f) => f.type in READ_SRC);
+    if (!flat) {
+        return {
+            read: (buf) => decodeSchema(schema, buf).result,
+            write: (fields) => writeSchema(fields, schema),
+        };
+    }
+    let rBody = "const o={};";
+    let wBody = "";
+    for (const f of schema) {
+        const n = JSON.stringify(f.name);
+        rBody += `o[${n}]=${READ_SRC[f.type as PrimitiveType]};`;
+        wBody += WRITE_SRC[f.type as PrimitiveType](n) + ";";
+    }
+    rBody += "return o;";
+    wBody += "return w.getBuffer();";
+    // eslint-disable-next-line no-new-func
+    const readFn = new Function("R", "buf", `const r=new R(buf);${rBody}`) as (R: any, buf: Buffer) => any;
+    // eslint-disable-next-line no-new-func
+    const writeFn = new Function("W", "s", `const w=new W();${wBody}`) as (W: any, s: any) => Buffer;
+    return {
+        read: (buf) => readFn(BufferReader, buf),
+        write: (fields) => writeFn(BufferWriter, fields),
+    };
 }

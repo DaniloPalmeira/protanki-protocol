@@ -18,6 +18,7 @@ export type PrimitiveType =
     | "i8"
     | "i16"
     | "i32"
+    | "i64"
     | "f32"
     | "bool"
     | "resource"

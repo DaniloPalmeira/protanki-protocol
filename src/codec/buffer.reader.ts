@@ -51,6 +51,13 @@ export class BufferReader {
     return value;
   }
 
+  public readInt64BE(): bigint {
+    this.checkCanRead(8);
+    const value = this.buffer.readBigInt64BE(this.offset);
+    this.offset += 8;
+    return value;
+  }
+
   /** Reads a client Resource id (idHigh int32 + idLow int32), returning the idLow. */
   public readResource(): number {
     this.readInt32BE(); // idHigh (always 0 for our resources)

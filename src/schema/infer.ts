@@ -7,6 +7,7 @@ type PrimMap = {
     i8: number;
     i16: number;
     i32: number;
+    i64: bigint;
     f32: number;
     bool: boolean;
     resource: number;

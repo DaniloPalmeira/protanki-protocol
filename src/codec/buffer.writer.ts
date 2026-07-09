@@ -47,6 +47,12 @@ export class BufferWriter {
     return this;
   }
 
+  public writeInt64BE(value: bigint): this {
+    this.ensureCapacity(8);
+    this.length = this.buffer.writeBigInt64BE(value, this.length);
+    return this;
+  }
+
   /**
    * Writes a client Resource id (idHigh int32 + idLow int32). Our resources
    * always have idHigh = 0, so only the idLow is meaningful. The current client
