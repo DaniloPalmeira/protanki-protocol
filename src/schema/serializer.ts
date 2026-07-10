@@ -9,8 +9,10 @@ const READERS: Record<PrimitiveType, (r: BufferReader) => unknown> = {
     i32: (r) => r.readInt32BE(),
     i64: (r) => r.readInt64BE(),
     f32: (r) => r.readFloatBE(),
+    f64: (r) => r.readDoubleBE(),
     bool: (r) => r.readUInt8() === 1,
     resource: (r) => r.readResource(),
+    longPair: (r) => ({ high: r.readInt32BE(), low: r.readInt32BE() }),
     string: (r) => r.readOptionalString(),
     stringArray: (r) => r.readStringArray(),
     optStringArray: (r) => r.readStringArray(),
@@ -27,8 +29,10 @@ const WRITERS: Record<PrimitiveType, (w: BufferWriter, value: any) => void> = {
     i32: (w, v) => w.writeInt32BE(v),
     i64: (w, v) => w.writeInt64BE(v),
     f32: (w, v) => w.writeFloatBE(v),
+    f64: (w, v) => w.writeDoubleBE(v),
     bool: (w, v) => w.writeUInt8(v ? 1 : 0),
     resource: (w, v) => w.writeResource(v),
+    longPair: (w, v) => { w.writeInt32BE(v.high); w.writeInt32BE(v.low); },
     string: (w, v) => w.writeOptionalString(v),
     stringArray: (w, v) => w.writeStringArray(v),
     optStringArray: (w, v) => w.writeOptionalStringArray(v),
@@ -45,17 +49,28 @@ const WRITERS: Record<PrimitiveType, (w: BufferWriter, value: any) => void> = {
  * DON'T use this: they carry hand-written monomorphic read()/write() (see battle-combat.packets.ts /
  * battle mine packets). Everything else stays here where volume is low and the megamorphism is harmless.
  */
+function readList(of: PacketSchema, reader: BufferReader): Record<string, any>[] {
+    const count = reader.readInt32BE();
+    const items: Record<string, any>[] = [];
+    for (let i = 0; i < count; i++) {
+        const item: Record<string, any> = {};
+        readInto(item, of, reader);
+        items.push(item);
+    }
+    return items;
+}
+
+function writeList(items: any[], of: PacketSchema, writer: BufferWriter): void {
+    writer.writeInt32BE(items.length);
+    for (const item of items) writeInto(item, of, writer);
+}
+
 function readInto(target: Record<string, any>, schema: PacketSchema, reader: BufferReader): void {
     for (const field of schema) {
         if (field.type === "list") {
-            const count = reader.readInt32BE();
-            const items: Record<string, any>[] = [];
-            for (let i = 0; i < count; i++) {
-                const item: Record<string, any> = {};
-                readInto(item, field.of, reader);
-                items.push(item);
-            }
-            target[field.name] = items;
+            target[field.name] = readList(field.of, reader);
+        } else if (field.type === "nullableList") {
+            target[field.name] = reader.readUInt8() === 1 ? null : readList(field.of, reader);
         } else if (field.type === "object") {
             const obj: Record<string, any> = {};
             readInto(obj, field.of, reader);
@@ -77,10 +92,14 @@ function readInto(target: Record<string, any>, schema: PacketSchema, reader: Buf
 function writeInto(source: Record<string, any>, schema: PacketSchema, writer: BufferWriter): void {
     for (const field of schema) {
         if (field.type === "list") {
-            const items: any[] = source[field.name] ?? [];
-            writer.writeInt32BE(items.length);
-            for (const item of items) {
-                writeInto(item, field.of, writer);
+            writeList(source[field.name] ?? [], field.of, writer);
+        } else if (field.type === "nullableList") {
+            const value = source[field.name];
+            if (value == null) {
+                writer.writeUInt8(1);
+            } else {
+                writer.writeUInt8(0);
+                writeList(value, field.of, writer);
             }
         } else if (field.type === "object") {
             writeInto(source[field.name], field.of, writer);
@@ -126,7 +145,8 @@ export function decodeSchema(schema: PacketSchema, buffer: Buffer): { result: Re
 // Expressão de leitura por tipo, referenciando o reader `r`.
 const READ_SRC: Record<PrimitiveType, string> = {
     u8: "r.readUInt8()", i8: "r.readInt8()", i16: "r.readInt16BE()", i32: "r.readInt32BE()",
-    i64: "r.readInt64BE()", f32: "r.readFloatBE()", bool: "r.readUInt8()===1", resource: "r.readResource()",
+    i64: "r.readInt64BE()", f32: "r.readFloatBE()", f64: "r.readDoubleBE()", bool: "r.readUInt8()===1",
+    resource: "r.readResource()", longPair: "({high:r.readInt32BE(),low:r.readInt32BE()})",
     string: "r.readOptionalString()", stringArray: "r.readStringArray()", optStringArray: "r.readStringArray()",
     i16Array: "r.readInt16Array()", vector3: "r.readOptionalVector3()", vector3Array: "r.readVector3Array()",
     bytes: "r.readBytes(r.readInt32BE())",
@@ -136,7 +156,8 @@ const READ_SRC: Record<PrimitiveType, string> = {
 const WRITE_SRC: Record<PrimitiveType, (n: string) => string> = {
     u8: (n) => `w.writeUInt8(s[${n}])`, i8: (n) => `w.writeInt8(s[${n}])`, i16: (n) => `w.writeInt16BE(s[${n}])`,
     i32: (n) => `w.writeInt32BE(s[${n}])`, i64: (n) => `w.writeInt64BE(s[${n}])`, f32: (n) => `w.writeFloatBE(s[${n}])`,
-    bool: (n) => `w.writeUInt8(s[${n}]?1:0)`, resource: (n) => `w.writeResource(s[${n}])`,
+    f64: (n) => `w.writeDoubleBE(s[${n}])`, bool: (n) => `w.writeUInt8(s[${n}]?1:0)`, resource: (n) => `w.writeResource(s[${n}])`,
+    longPair: (n) => `w.writeInt32BE(s[${n}].high);w.writeInt32BE(s[${n}].low)`,
     string: (n) => `w.writeOptionalString(s[${n}])`, stringArray: (n) => `w.writeStringArray(s[${n}])`,
     optStringArray: (n) => `w.writeOptionalStringArray(s[${n}])`, i16Array: (n) => `w.writeInt16Array(s[${n}])`,
     vector3: (n) => `w.writeOptionalVector3(s[${n}])`, vector3Array: (n) => `w.writeVector3Array(s[${n}])`,
@@ -144,7 +165,8 @@ const WRITE_SRC: Record<PrimitiveType, (n: string) => string> = {
 };
 
 export interface CompiledCodec {
-    read(buffer: Buffer): Record<string, any>;
+    /** Lê `buffer`. Se `target` for passado, popula-o (evita alocar um objeto novo no hot-path). */
+    read(buffer: Buffer, target?: Record<string, any>): Record<string, any>;
     write(fields: Record<string, any>): Buffer;
 }
 
@@ -158,11 +180,16 @@ export function compileCodec(schema: PacketSchema): CompiledCodec {
     const flat = schema.every((f) => f.type in READ_SRC);
     if (!flat) {
         return {
-            read: (buf) => decodeSchema(schema, buf).result,
+            read: (buf, target) => {
+                const reader = new BufferReader(buf);
+                const out = target ?? {};
+                readInto(out, schema, reader);
+                return out;
+            },
             write: (fields) => writeSchema(fields, schema),
         };
     }
-    let rBody = "const o={};";
+    let rBody = "const o=t||{};";
     let wBody = "";
     for (const f of schema) {
         const n = JSON.stringify(f.name);
@@ -172,11 +199,11 @@ export function compileCodec(schema: PacketSchema): CompiledCodec {
     rBody += "return o;";
     wBody += "return w.getBuffer();";
     // eslint-disable-next-line no-new-func
-    const readFn = new Function("R", "buf", `const r=new R(buf);${rBody}`) as (R: any, buf: Buffer) => any;
+    const readFn = new Function("R", "buf", "t", `const r=new R(buf);${rBody}`) as (R: any, buf: Buffer, t?: any) => any;
     // eslint-disable-next-line no-new-func
     const writeFn = new Function("W", "s", `const w=new W();${wBody}`) as (W: any, s: any) => Buffer;
     return {
-        read: (buf) => readFn(BufferReader, buf),
+        read: (buf, target) => readFn(BufferReader, buf, target),
         write: (fields) => writeFn(BufferWriter, fields),
     };
 }

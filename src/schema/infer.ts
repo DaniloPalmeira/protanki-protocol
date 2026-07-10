@@ -9,8 +9,10 @@ type PrimMap = {
     i32: number;
     i64: bigint;
     f32: number;
+    f64: number;
     bool: boolean;
     resource: number;
+    longPair: { high: number; low: number };
     string: string | null;
     stringArray: string[];
     optStringArray: string[];
@@ -27,11 +29,13 @@ type FieldValue<F> = F extends { type: infer T }
         : F extends { of: infer O extends PacketSchema }
             ? T extends "list"
                 ? FieldsOf<O>[]
-                : T extends "object"
-                    ? FieldsOf<O>
-                    : T extends "optObject"
-                        ? FieldsOf<O> | null
-                        : unknown
+                : T extends "nullableList"
+                    ? FieldsOf<O>[] | null
+                    : T extends "object"
+                        ? FieldsOf<O>
+                        : T extends "optObject"
+                            ? FieldsOf<O> | null
+                            : unknown
             : unknown
     : unknown;
 

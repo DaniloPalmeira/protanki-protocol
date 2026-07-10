@@ -204,12 +204,36 @@ export const SetBattleInviteSound = def({
     schema: [{ name: "soundIdLow", type: "resource" }],
 });
 
-// Codec manual no server (montagem field-by-field com ResourceManager em runtime;
-// read lança). Opaco para o bridge por enquanto.
+// Blob fixo do módulo de clã (montado no server; read lança — S->C only). A ESTRUTURA fica aqui;
+// os VALORES (constantes + requestTags + podium) o server fornece. Ordem/tipos batem com a captura
+// oficial (2026-06-18). `requestTags` = Vector<String> bare (int32 count + optString) = tipo `list`.
 export const InitUserClanModels = def({
     id: -1338449818,
     name: "InitUserClanModels",
     direction: "s2c",
+    schema: [
+        { name: "moduleFlag1", type: "i8" },
+        { name: "moduleFlag2", type: "i8" },
+        { name: "moduleFlag3", type: "i8" },
+        { name: "reserved0", type: "i32" },
+        { name: "flagA", type: "i8" },
+        { name: "flagB", type: "i8" },
+        { name: "creationCost", type: "i32" },
+        { name: "reserved1", type: "i32" },
+        { name: "flagC", type: "i8" },
+        { name: "flagD", type: "i8" },
+        { name: "reserved2", type: "i32" },
+        { name: "reserved3", type: "i8" },
+        { name: "reserved4", type: "i8" },
+        { name: "requestTags", type: "list", of: [{ name: "tag", type: "string" }] },
+        { name: "reserved5", type: "i32" },
+        { name: "reserved6", type: "i32" },
+        { name: "reserved7", type: "i32" },
+        { name: "reserved8", type: "i8" },
+        { name: "reserved9", type: "i8" },
+        { name: "reserved10", type: "i8" },
+        { name: "podium", type: "resource" },
+    ],
 });
 
 export const OnReserveSlotTeam = def({

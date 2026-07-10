@@ -71,6 +71,13 @@ export class BufferReader {
     return value;
   }
 
+  public readDoubleBE(): number {
+    this.checkCanRead(8);
+    const value = this.buffer.readDoubleBE(this.offset);
+    this.offset += 8;
+    return value;
+  }
+
   public readOptionalString(): string | null {
     const isNull = this.readUInt8() === 1;
     if (isNull) {

@@ -2,13 +2,27 @@ import { PacketDef, def } from "../registry/packet-def";
 import { fields } from "../schema/infer";
 import { PacketSchema } from "../schema/types";
 
-// Clã. Muitos pacotes usam codec manual no server (ClanView/MemberModel, Long de 8 bytes,
-// vetores com presence byte). Schemas simples estão descritos para o bridge; os agregados
-// complexos ficam opacos (schema ausente) — o bridge ainda os identifica por nome.
+// Clã. A ESTRUTURA do fio (incl. o Long de 8 bytes = i64, os models e os vetores com presence byte)
+// fica aqui; o server passa os VALORES (ClanView/MemberModel → campos). `stringArray` = writeUInt8(0)
+// + int32 count + optStrings (o "presence byte" vector do cliente).
 
 const USER = fields([{ name: "username", type: "string" }]);
 const TAG = fields([{ name: "tag", type: "string" }]);
 const NAME = fields([{ name: "name", type: "string" }]);
+
+// Modelo LIGHT de clã (my-clan window field0, join-request card, ratings list). Ordem validada byte-a-byte.
+const LIGHT_CLAN_MODEL: PacketSchema = [
+    { name: "f1", type: "u8" }, { name: "clanId", type: "i64" }, { name: "leader", type: "string" }, { name: "description", type: "string" },
+    { name: "recruiting", type: "bool" }, { name: "f6", type: "i32" }, { name: "f7", type: "i32" }, { name: "minRank", type: "i8" },
+    { name: "name", type: "string" }, { name: "s10", type: "string" }, { name: "f11", type: "u8" }, { name: "tag", type: "string" },
+    { name: "memberNicks", type: "stringArray" }, { name: "logo", type: "string" }, { name: "rating", type: "i32" },
+];
+// Modelo de 10 campos do membro (Long lastOnlineDate = i64).
+const MEMBER_MODEL: PacketSchema = [
+    { name: "secondsInClan", type: "i32" }, { name: "deaths", type: "i32" }, { name: "kills", type: "i32" }, { name: "lastOnlineDate", type: "i64" },
+    { name: "permission", type: "i32" }, { name: "score", type: "i32" }, { name: "nick", type: "string" },
+    { name: "minesUsed", type: "i32" }, { name: "clanScore", type: "i32" }, { name: "weeklyClanScore", type: "i32" },
+];
 
 export const KickClanMember = def({ id: 459991202, name: "KickClanMember", direction: "c2s", schema: USER });
 export const SetClanMemberPosition = def({ id: 90109270, name: "SetClanMemberPosition", direction: "c2s", schema: [{ name: "username", type: "string" }, { name: "position", type: "i32" }] });
@@ -32,7 +46,7 @@ export const ShowNotInClanPanel = def({ id: -1123511676, name: "ShowNotInClanPan
 export const CloseClanWindow = def({ id: 924070374, name: "CloseClanWindow", direction: "both", schema: [] });
 export const HideNotInClanPanel = def({ id: -2002206647, name: "HideNotInClanPanel", direction: "c2s", schema: [] });
 export const GetClanRatingsData = def({ id: -2080893689, name: "GetClanRatingsData", direction: "c2s", schema: [{ name: "startIndex", type: "i32" }, { name: "count", type: "i32" }] });
-export const SetClanRatingsData = def({ id: 134406915, name: "SetClanRatingsData", direction: "s2c" });
+export const SetClanRatingsData = def({ id: 134406915, name: "SetClanRatingsData", direction: "s2c", schema: [{ name: "startIndex", type: "i32" }, { name: "clans", type: "list", of: LIGHT_CLAN_MODEL }] });
 export const ShowForeignClan = def({ id: 947733823, name: "ShowForeignClan", direction: "c2s", schema: TAG });
 export const CreateClan = def({ id: -1267250495, name: "CreateClan", direction: "c2s", schema: [{ name: "name", type: "string" }, { name: "tag", type: "string" }] });
 export const CheckClanTag = def({ id: -1879289905, name: "CheckClanTag", direction: "c2s", schema: TAG });
@@ -60,13 +74,24 @@ export const ClanSearchUnavailable = def({ id: -866005248, name: "ClanSearchUnav
 export const JoinClanByName = def({ id: -705969616, name: "JoinClanByName", direction: "c2s", schema: NAME });
 export const CancelJoinClanRequest = def({ id: 1913571122, name: "CancelJoinClanRequest", direction: "c2s", schema: TAG });
 export const CancelJoinRequestFromModal = def({ id: -930926299, name: "CancelJoinRequestFromModal", direction: "c2s", schema: TAG });
-export const MyClanWindow = def({ id: -8296541, name: "MyClanWindow", direction: "s2c" });
+export const MyClanWindow = def({ id: -8296541, name: "MyClanWindow", direction: "s2c", schema: [
+    { name: "clanModel", type: "object", of: LIGHT_CLAN_MODEL },
+    { name: "members", type: "list", of: MEMBER_MODEL },
+    { name: "perms", type: "list", of: [{ name: "ordinal", type: "i32" }] },
+    { name: "memberNicks", type: "stringArray" }, { name: "joinRequests", type: "stringArray" }, { name: "sentInvites", type: "stringArray" },
+] });
 export const ClanTagNotify = def({ id: -88976442, name: "ClanTagNotify", direction: "s2c", schema: TAG });
 export const ClanNameNotify = def({ id: -1673544562, name: "ClanNameNotify", direction: "s2c", schema: NAME });
-export const AddClanMember = def({ id: 1741285576, name: "AddClanMember", direction: "s2c" });
+export const AddClanMember = def({ id: 1741285576, name: "AddClanMember", direction: "s2c", schema: MEMBER_MODEL });
 export const MemberAddedNotify = def({ id: 385150953, name: "MemberAddedNotify", direction: "s2c", schema: USER });
 export const ClanLeaderNotify = def({ id: -915300943, name: "ClanLeaderNotify", direction: "s2c", schema: [{ name: "nick", type: "string" }] });
-export const JoinRequestModel = def({ id: 325031295, name: "JoinRequestModel", direction: "s2c" });
+// Card de pedido de entrada: tag externa + um light model com layout PRÓPRIO (não é o LIGHT_CLAN_MODEL).
+export const JoinRequestModel = def({ id: 325031295, name: "JoinRequestModel", direction: "s2c", schema: [
+    { name: "outerTag", type: "string" }, { name: "f1", type: "u8" }, { name: "clanId", type: "i64" }, { name: "leader", type: "string" },
+    { name: "recruiting", type: "bool" }, { name: "f6", type: "u8" }, { name: "f7", type: "i32" }, { name: "f8", type: "i32" }, { name: "minRank", type: "i8" },
+    { name: "name", type: "string" }, { name: "f11", type: "u8" }, { name: "f12", type: "u8" }, { name: "tag", type: "string" },
+    { name: "memberNicks", type: "stringArray" }, { name: "logo", type: "string" }, { name: "rating", type: "i32" },
+] });
 export const JoinRequestSent = def({ id: -905757704, name: "JoinRequestSent", direction: "s2c", schema: TAG });
 export const JoinRequestCancelled = def({ id: -2007179326, name: "JoinRequestCancelled", direction: "s2c", schema: TAG });
 export const ClanTagAvailable = def({ id: -965581529, name: "ClanTagAvailable", direction: "s2c", schema: [] });
@@ -74,6 +99,18 @@ export const ClanTagTaken = def({ id: 1873830541, name: "ClanTagTaken", directio
 export const ClanNameAvailable = def({ id: -148282578, name: "ClanNameAvailable", direction: "s2c", schema: [] });
 export const ClanNameTaken = def({ id: -253044119, name: "ClanNameTaken", direction: "s2c", schema: [] });
 export const ShowNotInClanWindow = def({ id: 560344632, name: "ShowNotInClanWindow", direction: "s2c", schema: [{ name: "intro", type: "resource" }, { name: "card", type: "resource" }] });
-export const ShowForeignClanWindow = def({ id: -1855118498, name: "ShowForeignClanWindow", direction: "s2c" });
+// Janela de clã (read-only). Layout PRÓPRIO (members SEM presence byte). Campos desconhecidos = defaults FaZe.
+export const ShowForeignClanWindow = def({ id: -1855118498, name: "ShowForeignClanWindow", direction: "s2c", schema: [
+    { name: "f1", type: "u8" }, { name: "clanId", type: "i64" }, { name: "leader", type: "string" }, { name: "description", type: "string" },
+    { name: "recruiting", type: "bool" }, { name: "f6", type: "i32" }, { name: "f7", type: "u8" }, { name: "f8", type: "u8" },
+    { name: "name", type: "string" }, { name: "f10", type: "string" }, { name: "f11", type: "u8" }, { name: "f12", type: "u8" }, { name: "tag", type: "string" },
+    { name: "members", type: "list", of: MEMBER_MODEL }, { name: "logo", type: "string" }, { name: "rating", type: "i32" },
+] });
 export const OpenClanMissions = def({ id: -2127613673, name: "OpenClanMissions", direction: "c2s", schema: [] });
-export const ShowClanMissions = def({ id: 1720177051, name: "ShowClanMissions", direction: "s2c" });
+export const ShowClanMissions = def({ id: 1720177051, name: "ShowClanMissions", direction: "s2c", schema: [
+    { name: "missions", type: "list", of: [
+        { name: "id", type: "i32" }, { name: "icon", type: "resource" }, { name: "description", type: "string" },
+        { name: "prizes", type: "list", of: [{ name: "count", type: "i32" }, { name: "name", type: "string" }] },
+        { name: "criteria", type: "i32" }, { name: "progress", type: "i32" }, { name: "secondsToReset", type: "i32" }, { name: "completed", type: "bool" },
+    ] },
+] });

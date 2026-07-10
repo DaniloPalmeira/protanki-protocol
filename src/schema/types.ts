@@ -20,8 +20,10 @@ export type PrimitiveType =
     | "i32"
     | "i64"
     | "f32"
+    | "f64"
     | "bool"
     | "resource"
+    | "longPair"
     | "string"
     | "stringArray"
     | "optStringArray"
@@ -37,7 +39,8 @@ export interface PrimitiveField {
 
 export interface CompositeField {
     name: string;
-    type: "list" | "object" | "optObject";
+    // `nullableList` = 1-byte null-flag, então (se presente) int32 count + N itens. Valor: null | array.
+    type: "list" | "nullableList" | "object" | "optObject";
     of: PacketSchema;
 }
 

@@ -2,8 +2,9 @@ import { PacketDef } from "./packet-def";
 import * as definitions from "../definitions";
 
 // Achata todos os namespaces de feature (defs.auth.*, defs.lobby.*, ...) numa lista.
-const ALL: PacketDef[] = Object.values(definitions).flatMap(
-    (feature) => Object.values(feature) as PacketDef[]
+// Ignora exports auxiliares (ex.: schemas hit/miss do shaft) — só entram PacketDefs (com `id`).
+const ALL: PacketDef[] = Object.values(definitions).flatMap((feature) =>
+    (Object.values(feature) as any[]).filter((d): d is PacketDef => d != null && typeof d.id === "number")
 );
 
 export const byId = new Map<number, PacketDef>(ALL.map((d) => [d.id, d]));

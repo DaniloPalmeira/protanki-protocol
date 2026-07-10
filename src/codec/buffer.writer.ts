@@ -71,6 +71,12 @@ export class BufferWriter {
     return this;
   }
 
+  public writeDoubleBE(value: number): this {
+    this.ensureCapacity(8);
+    this.length = this.buffer.writeDoubleBE(value, this.length);
+    return this;
+  }
+
   public writeOptionalString(value: string | null): this {
     const isNull = value === null || value === undefined;
     this.writeUInt8(isNull ? 1 : 0);
