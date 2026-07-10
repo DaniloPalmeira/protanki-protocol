@@ -196,3 +196,6 @@ export const Registration = def({
         { name: "minPasswordLength", type: "i32" },
     ],
 });
+
+export const ValidateResult = def({ id: -1565553333, name: "ValidateResult", direction: "s2c", schema: [{ name: "status", type: "i32" }] });
+export const ValidateUid = def({ id: -635715470, name: "ValidateUid", direction: "s2c", schema: [{ name: "uid", type: "string" }] });

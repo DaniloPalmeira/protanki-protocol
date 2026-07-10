@@ -16,6 +16,7 @@ type PrimMap = {
     string: string | null;
     stringArray: string[];
     optStringArray: string[];
+    nullableStringArray: string[] | null;
     i16Array: number[];
     vector3: IVector3 | null;
     vector3Array: (IVector3 | null)[];

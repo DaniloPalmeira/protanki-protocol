@@ -27,6 +27,7 @@ export type PrimitiveType =
     | "string"
     | "stringArray"
     | "optStringArray"
+    | "nullableStringArray"
     | "i16Array"
     | "vector3"
     | "vector3Array"

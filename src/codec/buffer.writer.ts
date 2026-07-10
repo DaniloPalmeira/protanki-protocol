@@ -112,6 +112,20 @@ export class BufferWriter {
     return this;
   }
 
+  /** Vector.<String> anulável: null-flag distinto de vazio (ver readNullableStringArray). */
+  public writeNullableStringArray(array: string[] | null): this {
+    if (array === null || array === undefined) {
+      this.writeUInt8(1);
+      return this;
+    }
+    this.writeUInt8(0);
+    this.writeInt32BE(array.length);
+    for (const item of array) {
+      this.writeOptionalString(item);
+    }
+    return this;
+  }
+
   public writeInt16Array(array: number[] | null): this {
     const isEmpty = !array || array.length === 0;
     this.writeUInt8(isEmpty ? 1 : 0);

@@ -207,32 +207,27 @@ export const SetBattleInviteSound = def({
 // Blob fixo do módulo de clã (montado no server; read lança — S->C only). A ESTRUTURA fica aqui;
 // os VALORES (constantes + requestTags + podium) o server fornece. Ordem/tipos batem com a captura
 // oficial (2026-06-18). `requestTags` = Vector<String> bare (int32 count + optString) = tipo `list`.
+// Forma OFICIAL do ProTanki (validada byte-a-byte contra capturas, inclusive o caso com
+// pedido de entrada pendente). Campos f0..f15 são posicionais (o client decompilado não
+// preservou os nomes). NOTA: o letanki-server envia uma forma DIFERENTE (ver o override
+// local em InitUserClanModelsPacket) — ele diverge do oficial neste pacote.
 export const InitUserClanModels = def({
     id: -1338449818,
     name: "InitUserClanModels",
     direction: "s2c",
     schema: [
-        { name: "moduleFlag1", type: "i8" },
-        { name: "moduleFlag2", type: "i8" },
-        { name: "moduleFlag3", type: "i8" },
-        { name: "reserved0", type: "i32" },
-        { name: "flagA", type: "i8" },
-        { name: "flagB", type: "i8" },
-        { name: "creationCost", type: "i32" },
-        { name: "reserved1", type: "i32" },
-        { name: "flagC", type: "i8" },
-        { name: "flagD", type: "i8" },
-        { name: "reserved2", type: "i32" },
-        { name: "reserved3", type: "i8" },
-        { name: "reserved4", type: "i8" },
-        { name: "requestTags", type: "list", of: [{ name: "tag", type: "string" }] },
-        { name: "reserved5", type: "i32" },
-        { name: "reserved6", type: "i32" },
-        { name: "reserved7", type: "i32" },
-        { name: "reserved8", type: "i8" },
-        { name: "reserved9", type: "i8" },
-        { name: "reserved10", type: "i8" },
-        { name: "podium", type: "resource" },
+        { name: "f0", type: "string" },
+        { name: "f1", type: "bool" }, { name: "f2", type: "bool" },
+        { name: "f3", type: "i32" },
+        { name: "f4", type: "bool" }, { name: "f5", type: "bool" },
+        { name: "f6", type: "i32" }, { name: "f7", type: "i32" },
+        { name: "f8", type: "bool" }, { name: "f9", type: "i8" },
+        { name: "f10", type: "nullableStringArray" },
+        { name: "f11", type: "nullableStringArray" },
+        { name: "f12", type: "nullableStringArray" },
+        { name: "f13", type: "nullableStringArray" },
+        { name: "f14", type: "nullableStringArray" },
+        { name: "f15", type: "longPair" },
     ],
 });
 

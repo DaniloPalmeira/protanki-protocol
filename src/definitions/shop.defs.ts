@@ -7,3 +7,4 @@ export const RequestShopData = def({ id: 1153801756, name: "RequestShopData", di
 export const SetShopCountry = def({ id: 921004371, name: "SetShopCountry", direction: "c2s", schema: [{ name: "countryCode", type: "string" }] });
 export const ShopData = def({ id: 1863710730, name: "ShopData", direction: "s2c", schema: [{ name: "payload", type: "string" }] });
 export const ShowPaymentWindow = def({ id: 1870342869, name: "ShowPaymentWindow", direction: "s2c", schema: [] });
+export const PurchasePresent = def({ id: -1518850075, name: "PurchasePresent", direction: "s2c", schema: [{ name: "itemId", type: "string" }, { name: "recipientId", type: "string" }, { name: "message", type: "string" }, { name: "quantity", type: "i32" }] });

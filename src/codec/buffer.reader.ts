@@ -112,6 +112,23 @@ export class BufferReader {
     return array;
   }
 
+  /**
+   * Vector.<String> anulável (codec AS3 CodecVector): 1 byte null-flag, então (se não-nulo)
+   * int32 count + N optional-strings. DISTINGUE null (flag=1) de vazio (flag=0, count=0) —
+   * diferente de readStringArray, que colapsa os dois em [].
+   */
+  public readNullableStringArray(): string[] | null {
+    if (this.readUInt8() === 1) {
+      return null;
+    }
+    const count = this.readInt32BE();
+    const array: string[] = [];
+    for (let i = 0; i < count; i++) {
+      array.push(this.readOptionalString() ?? "");
+    }
+    return array;
+  }
+
   public readInt16Array(): number[] {
     const isEmpty = this.readUInt8() === 1;
     if (isEmpty) {

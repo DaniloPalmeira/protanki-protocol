@@ -16,6 +16,7 @@ const READERS: Record<PrimitiveType, (r: BufferReader) => unknown> = {
     string: (r) => r.readOptionalString(),
     stringArray: (r) => r.readStringArray(),
     optStringArray: (r) => r.readStringArray(),
+    nullableStringArray: (r) => r.readNullableStringArray(),
     i16Array: (r) => r.readInt16Array(),
     vector3: (r) => r.readOptionalVector3(),
     vector3Array: (r) => r.readVector3Array(),
@@ -36,6 +37,7 @@ const WRITERS: Record<PrimitiveType, (w: BufferWriter, value: any) => void> = {
     string: (w, v) => w.writeOptionalString(v),
     stringArray: (w, v) => w.writeStringArray(v),
     optStringArray: (w, v) => w.writeOptionalStringArray(v),
+    nullableStringArray: (w, v) => w.writeNullableStringArray(v),
     i16Array: (w, v) => w.writeInt16Array(v),
     vector3: (w, v) => w.writeOptionalVector3(v),
     vector3Array: (w, v) => w.writeVector3Array(v),
@@ -148,6 +150,7 @@ const READ_SRC: Record<PrimitiveType, string> = {
     i64: "r.readInt64BE()", f32: "r.readFloatBE()", f64: "r.readDoubleBE()", bool: "r.readUInt8()===1",
     resource: "r.readResource()", longPair: "({high:r.readInt32BE(),low:r.readInt32BE()})",
     string: "r.readOptionalString()", stringArray: "r.readStringArray()", optStringArray: "r.readStringArray()",
+    nullableStringArray: "r.readNullableStringArray()",
     i16Array: "r.readInt16Array()", vector3: "r.readOptionalVector3()", vector3Array: "r.readVector3Array()",
     bytes: "r.readBytes(r.readInt32BE())",
 };
@@ -160,6 +163,7 @@ const WRITE_SRC: Record<PrimitiveType, (n: string) => string> = {
     longPair: (n) => `w.writeInt32BE(s[${n}].high);w.writeInt32BE(s[${n}].low)`,
     string: (n) => `w.writeOptionalString(s[${n}])`, stringArray: (n) => `w.writeStringArray(s[${n}])`,
     optStringArray: (n) => `w.writeOptionalStringArray(s[${n}])`, i16Array: (n) => `w.writeInt16Array(s[${n}])`,
+    nullableStringArray: (n) => `w.writeNullableStringArray(s[${n}])`,
     vector3: (n) => `w.writeOptionalVector3(s[${n}])`, vector3Array: (n) => `w.writeVector3Array(s[${n}])`,
     bytes: (n) => `w.writeInt32BE(s[${n}].length);w.writeBuffer(s[${n}])`,
 };

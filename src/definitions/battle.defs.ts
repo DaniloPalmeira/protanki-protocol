@@ -79,7 +79,27 @@ export const RestartRoundDm = def({ id: 1061006142, name: "RestartRoundDm", dire
 
 export const BattleConsumables = def({ id: -137249251, name: "BattleConsumables", direction: "s2c", schema: [{ name: "jsonData", type: "string" }] });
 export const BattleMinesProperties = def({ id: -226978906, name: "BattleMinesProperties", direction: "s2c", schema: [{ name: "activateSound", type: "resource" }, { name: "activateTimeMsec", type: "i32" }, { name: "battleMines", type: "list", of: [{ name: "mineId", type: "string" }, { name: "ownerId", type: "string" }, { name: "position", type: "vector3" }] }, { name: "blueMineTexture", type: "resource" }, { name: "deactivateSound", type: "resource" }, { name: "enemyMineTexture", type: "resource" }, { name: "explosionMarkTexture", type: "resource" }, { name: "explosionSound", type: "resource" }, { name: "farVisibilityRadius", type: "f32" }, { name: "friendlyMineTexture", type: "resource" }, { name: "idleExplosionTexture", type: "resource" }, { name: "impactForce", type: "f32" }, { name: "mainExplosionTexture", type: "resource" }, { name: "minDistanceFromBase", type: "f32" }, { name: "model3ds", type: "resource" }, { name: "nearVisibilityRadius", type: "f32" }, { name: "radius", type: "f32" }, { name: "redMineTexture", type: "resource" }] });
-export const BattleStats = def({ id: 522993449, name: "BattleStats", direction: "s2c", schema: [{ name: "battleMode", type: "i32" }, { name: "equipmentConstraintsMode", type: "i32" }, { name: "fund", type: "i32" }, { name: "scoreLimit", type: "i32" }, { name: "timeLimitInSec", type: "i32" }, { name: "mapName", type: "string" }, { name: "maxPeopleCount", type: "i32" }, { name: "parkourMode", type: "bool" }, { name: "premiumBonusInPercent", type: "i32" }, { name: "spectator", type: "bool" }, { name: "suspiciousUserIds", type: "optStringArray" }, { name: "timeLeft", type: "i32" }] });
+export const BattleStats = def({ id: 522993449, name: "BattleStats", direction: "s2c", schema: [{ name: "battleMode", type: "i32" }, { name: "equipmentConstraintsMode", type: "i32" }, { name: "fund", type: "i32" }, { name: "scoreLimit", type: "i32" }, { name: "timeLimitInSec", type: "i32" }, { name: "mapName", type: "string" }, { name: "maxPeopleCount", type: "i32" }, { name: "parkourMode", type: "bool" }, { name: "premiumBonusInPercent", type: "i32" }, { name: "spectator", type: "bool" }, { name: "suspiciousUserIds", type: "nullableStringArray" }, { name: "timeLeft", type: "i32" }] });
+
+// Campos posicionais (f0..f13) — reverse-engineered do client, validado contra capturas.
+export const InitMeteorStormModel = def({
+    id: 1758551995, name: "InitMeteorStormModel", direction: "s2c", schema: [
+        { name: "f0", type: "longPair" },
+        { name: "f1", type: "list", of: [
+            { name: "f0", type: "vector3" }, { name: "f1", type: "i32" }, { name: "f2", type: "i32" }, { name: "f3", type: "vector3" },
+        ] },
+        { name: "f2", type: "i32" },
+        { name: "f3", type: "longPair" }, { name: "f4", type: "longPair" }, { name: "f5", type: "longPair" },
+        { name: "f6", type: "longPair" }, { name: "f7", type: "longPair" }, { name: "f8", type: "longPair" },
+        { name: "f9", type: "longPair" }, { name: "f10", type: "longPair" }, { name: "f11", type: "longPair" },
+        { name: "f12", type: "list", of: [
+            { name: "f0", type: "f32" }, { name: "f1", type: "f32" }, { name: "f2", type: "i32" }, { name: "f3", type: "f32" }, { name: "f4", type: "i32" },
+        ] },
+        { name: "f13", type: "longPair" },
+    ],
+});
+
+export const ClearBattleUsers = def({ id: -994817471, name: "ClearBattleUsers", direction: "s2c", schema: [{ name: "battleId", type: "string" }] });
 export const BattleUserEffects = def({ id: 417965410, name: "BattleUserEffects", direction: "s2c", schema: [{ name: "jsonData", type: "string" }] });
 export const BonusData = def({ id: 228171466, name: "BonusData", direction: "s2c", schema: [{ name: "jsonData", type: "string" }] });
 export const InitBonuses = def({ id: 870278784, name: "InitBonuses", direction: "s2c", schema: [{ name: "jsonData", type: "string" }] });
