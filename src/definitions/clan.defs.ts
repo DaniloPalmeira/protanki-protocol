@@ -113,8 +113,8 @@ export const ShowForeignClanWindow = def({ id: -1855118498, name: "ShowForeignCl
     { name: "description", type: "string" },
     // false → botão desabilitado com "CLAN_NOT_RECRUITING".
     { name: "recruiting", type: "bool" },
-    // Carregado no composite mas nunca lido pela UI (nenhuma leitura no client).
-    { name: "unusedInt", type: "i32" },
+    // Limite de membros do clã (lado servidor; o client carrega mas não lê este campo).
+    { name: "maxMembers", type: "i32" },
     // true → esconde o botão de entrada (provável "é o seu próprio clã"). Confiança baixa.
     { name: "joinHidden", type: "u8" },
     // Rank mínimo p/ pedir entrada (byte; se > rank do usuário, esconde o botão).
