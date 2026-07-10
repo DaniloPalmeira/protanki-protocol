@@ -81,23 +81,49 @@ export const BattleConsumables = def({ id: -137249251, name: "BattleConsumables"
 export const BattleMinesProperties = def({ id: -226978906, name: "BattleMinesProperties", direction: "s2c", schema: [{ name: "activateSound", type: "resource" }, { name: "activateTimeMsec", type: "i32" }, { name: "battleMines", type: "list", of: [{ name: "mineId", type: "string" }, { name: "ownerId", type: "string" }, { name: "position", type: "vector3" }] }, { name: "blueMineTexture", type: "resource" }, { name: "deactivateSound", type: "resource" }, { name: "enemyMineTexture", type: "resource" }, { name: "explosionMarkTexture", type: "resource" }, { name: "explosionSound", type: "resource" }, { name: "farVisibilityRadius", type: "f32" }, { name: "friendlyMineTexture", type: "resource" }, { name: "idleExplosionTexture", type: "resource" }, { name: "impactForce", type: "f32" }, { name: "mainExplosionTexture", type: "resource" }, { name: "minDistanceFromBase", type: "f32" }, { name: "model3ds", type: "resource" }, { name: "nearVisibilityRadius", type: "f32" }, { name: "radius", type: "f32" }, { name: "redMineTexture", type: "resource" }] });
 export const BattleStats = def({ id: 522993449, name: "BattleStats", direction: "s2c", schema: [{ name: "battleMode", type: "i32" }, { name: "equipmentConstraintsMode", type: "i32" }, { name: "fund", type: "i32" }, { name: "scoreLimit", type: "i32" }, { name: "timeLimitInSec", type: "i32" }, { name: "mapName", type: "string" }, { name: "maxPeopleCount", type: "i32" }, { name: "parkourMode", type: "bool" }, { name: "premiumBonusInPercent", type: "i32" }, { name: "spectator", type: "bool" }, { name: "suspiciousUserIds", type: "nullableStringArray" }, { name: "timeLeft", type: "i32" }] });
 
-// Campos posicionais (f0..f13) — reverse-engineered do client, validado contra capturas.
+// Nomes recuperados do client decompilado (view do meteoro + efeito de explosão + luz OmniLight).
+// longPair = resource id. Ciclo no client: meteoro voa de startPosition → impactPosition em
+// fallTimeMs tocando fallSound; nos últimos descentSoundLeadMs troca p/ descentSound; no impacto
+// toca explosionSound, dispara o efeito (flash/glow únicos + anéis de fire/smoke) e carimba
+// explosionMarkTexture no chão. trailTexture = 24 sprites aditivos seguindo o meteoro;
+// flightSmokeTexture = fumaças soltas a cada ~24ms do voo. lightAnimation = keyframes da
+// OmniLight do meteoro (campos mapeiam 1:1 nas props do engine).
 export const InitMeteorStormModel = def({
     id: 1758551995, name: "InitMeteorStormModel", direction: "s2c", schema: [
-        { name: "f0", type: "longPair" },
-        { name: "f1", type: "list", of: [
-            { name: "f0", type: "vector3" }, { name: "f1", type: "i32" }, { name: "f2", type: "i32" }, { name: "f3", type: "vector3" },
+        { name: "explosionMarkTexture", type: "longPair" },
+        // Meteoros já em queda quando o player entra (elapsedTimeMs = quanto do voo já passou).
+        { name: "meteors", type: "list", of: [
+            { name: "impactPosition", type: "vector3" }, { name: "elapsedTimeMs", type: "i32" },
+            { name: "fallTimeMs", type: "i32" }, { name: "startPosition", type: "vector3" },
         ] },
-        { name: "f2", type: "i32" },
-        { name: "f3", type: "longPair" }, { name: "f4", type: "longPair" }, { name: "f5", type: "longPair" },
-        { name: "f6", type: "longPair" }, { name: "f7", type: "longPair" }, { name: "f8", type: "longPair" },
-        { name: "f9", type: "longPair" }, { name: "f10", type: "longPair" }, { name: "f11", type: "longPair" },
-        { name: "f12", type: "list", of: [
-            { name: "f0", type: "f32" }, { name: "f1", type: "f32" }, { name: "f2", type: "i32" }, { name: "f3", type: "f32" }, { name: "f4", type: "i32" },
+        { name: "descentSoundLeadMs", type: "i32" },
+        { name: "descentSound", type: "longPair" },
+        { name: "fallSound", type: "longPair" },
+        // Resource 3D (mesh + textura própria) do meteoro.
+        { name: "meteorModel", type: "longPair" },
+        { name: "explosionSmokeTexture", type: "longPair" },
+        // Efeito único principal da explosão (flash/bola de fogo).
+        { name: "explosionFlashTexture", type: "longPair" },
+        // Anéis de partículas aditivas da explosão.
+        { name: "explosionFireTexture", type: "longPair" },
+        { name: "explosionSound", type: "longPair" },
+        // Segundo efeito único da explosão (glow/onda). Confiança média na distinção flash×glow.
+        { name: "explosionGlowTexture", type: "longPair" },
+        { name: "trailTexture", type: "longPair" },
+        // QUIRK: o server oficial escreve bits de int32 nos floats (100/400/1000/1/0 → denormais
+        // ≈0), então a luz fica invisível lá. Um server correto deve mandar floats de verdade.
+        { name: "lightAnimation", type: "list", of: [
+            { name: "attenuationBegin", type: "f32" }, { name: "attenuationEnd", type: "f32" },
+            { name: "color", type: "i32" }, { name: "intensity", type: "f32" }, { name: "timeMs", type: "i32" },
         ] },
-        { name: "f13", type: "longPair" },
+        { name: "flightSmokeTexture", type: "longPair" },
     ],
 });
+// Eventos do mesmo módulo (model 80): aviso da tempestade (toca o fallSound) e queda de um meteoro.
+export const MeteorStormWarning = def({ id: -662400123, name: "MeteorStormWarning", direction: "s2c", schema: [] });
+export const DropMeteor = def({ id: -1045406775, name: "DropMeteor", direction: "s2c", schema: [
+    { name: "startPosition", type: "vector3" }, { name: "impactPosition", type: "vector3" }, { name: "fallTimeMs", type: "i32" },
+] });
 
 export const ClearBattleUsers = def({ id: -994817471, name: "ClearBattleUsers", direction: "s2c", schema: [{ name: "battleId", type: "string" }] });
 export const BattleUserEffects = def({ id: 417965410, name: "BattleUserEffects", direction: "s2c", schema: [{ name: "jsonData", type: "string" }] });
