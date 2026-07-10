@@ -54,11 +54,21 @@ export const RicochetTargetShotCommand = def({ id: 1229701582, name: "RicochetTa
 export const RicochetShot = def({ id: -118119523, name: "RicochetShot", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "x", type: "i16" }, { name: "y", type: "i16" }, { name: "z", type: "i16" }] });
 
 // ===== shaft =====
-// Head fixo + tail opcional dos shot-commands (arcade/aiming). Server lê o head e, se sobrar, o tail.
-export const ShaftShotCommandHeadSchema = fields([{ name: "clientTime", type: "i32" }, { name: "origin", type: "vector3" }, { name: "unknownA", type: "i32" }, { name: "unknownB", type: "i8" }]);
-export const ShaftShotCommandTailSchema = fields([{ name: "target", type: "string" }, { name: "unknownC", type: "i8" }, { name: "unknownD", type: "i32" }, { name: "hit", type: "vector3" }]);
-export const ShaftArcadeShotCommand = def({ id: -2030760866, name: "ShaftArcadeShotCommand", direction: "c2s", schema: ShaftShotCommandHeadSchema });
-export const ShaftAimingShotCommand = def({ id: 1632423559, name: "ShaftAimingShotCommand", direction: "c2s", schema: ShaftShotCommandHeadSchema });
+// Estrutura REAL do client (o antigo hack head/tail só cobria 0–1 alvo; o Shaft perfura vários).
+// Vetores paralelos indexados por alvo; null quando o tiro não acertou tanque.
+// Validado contra capturas (20 comandos, incl. multi-campos preenchidos): incarnations = i16/item.
+export const ShaftShotCommandSchema = fields([
+    { name: "clientTime", type: "i32" },
+    // Ponto atingido no cenário (null-flag no próprio vector3 quando só acertou tanques).
+    { name: "staticHitPoint", type: "vector3" },
+    { name: "targets", type: "nullableStringArray" },
+    { name: "localHitPoints", type: "nullableList", of: [{ name: "v", type: "vector3" }] },
+    { name: "incarnations", type: "nullableList", of: [{ name: "i", type: "i16" }] },
+    { name: "targetPositions", type: "nullableList", of: [{ name: "v", type: "vector3" }] },
+    { name: "globalHitPoints", type: "nullableList", of: [{ name: "v", type: "vector3" }] },
+]);
+export const ShaftArcadeShotCommand = def({ id: -2030760866, name: "ShaftArcadeShotCommand", direction: "c2s", schema: ShaftShotCommandSchema });
+export const ShaftAimingShotCommand = def({ id: 1632423559, name: "ShaftAimingShotCommand", direction: "c2s", schema: ShaftShotCommandSchema });
 export const ShaftAimTrackCommand = def({ id: -1517837003, name: "ShaftAimTrackCommand", direction: "c2s", schema: [{ name: "target", type: "string" }, { name: "direction", type: "vector3" }] });
 export const ShaftAimTrack = def({ id: 11992250, name: "ShaftAimTrack", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "target", type: "string" }, { name: "direction", type: "vector3" }] });
 export const ShaftEnterAiming = def({ id: -367760678, name: "ShaftEnterAiming", direction: "c2s", schema: [] });
@@ -66,13 +76,15 @@ export const ShaftAimEngaged = def({ id: -1487306515, name: "ShaftAimEngaged", d
 export const ShaftExitAiming = def({ id: 843751647, name: "ShaftExitAiming", direction: "c2s", schema: [] });
 export const ShaftAimEnterRelay = def({ id: -1222085753, name: "ShaftAimEnterRelay", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
 export const ShaftAimExitRelay = def({ id: -380595194, name: "ShaftAimExitRelay", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
-// ShaftShot: encoding CONDICIONAL. `schema` = variante HIT; `ShaftShotMissSchema` = variante MISS.
-// O server escolhe pelo `target !== null` (lógica) e a lib escreve os bytes.
+// ShaftShot s2c: estrutura REAL do client (substitui as variantes hit/miss com pads —
+// no wire é UM schema só; miss = targets/hitPoints null).
 export const ShaftShot = def({ id: 1184835319, name: "ShaftShot", direction: "s2c", schema: [
-    { name: "nickname", type: "string" }, { name: "origin", type: "vector3" }, { name: "padA", type: "i32" }, { name: "padB", type: "i8" },
-    { name: "target", type: "string" }, { name: "padC", type: "i8" }, { name: "padD", type: "i32" }, { name: "hit", type: "vector3" }, { name: "power", type: "f32" },
+    { name: "nickname", type: "string" },
+    { name: "staticHitPoint", type: "vector3" },
+    { name: "targets", type: "nullableStringArray" },
+    { name: "localHitPoints", type: "nullableList", of: [{ name: "v", type: "vector3" }] },
+    { name: "power", type: "f32" },
 ] });
-export const ShaftShotMissSchema = fields([{ name: "nickname", type: "string" }, { name: "origin", type: "vector3" }, { name: "target", type: "string" }, { name: "hit", type: "vector3" }, { name: "power", type: "f32" }]);
 
 // ===== flamethrower =====
 // HitCommand: lê só clientTime + targets (o resto do fio — short + 2 vec-arrays — é ignorado).
@@ -110,10 +122,12 @@ export const StopShootingMachinegun = def({ id: 133452238, name: "StopShootingMa
 
 // ===== shotgun =====
 // ShotCommand: lê a list de pellets; server AGREGA em hitsByTarget (lógica).
+// Item do pellet = mesmo formato dos targets do Machinegun (nomes do client):
+// hit local, orientação e posição do alvo, id do alvo (null = acertou cenário) e turretAngle f32.
 export const ShotgunShotCommand = def({ id: -541655881, name: "ShotgunShotCommand", direction: "c2s", schema: [
     { name: "clientTime", type: "i32" }, { name: "direction", type: "vector3" },
     { name: "hits", type: "list", of: [
-        { name: "worldHit", type: "vector3" }, { name: "normal", type: "vector3" }, { name: "center", type: "vector3" }, { name: "target", type: "string" }, { name: "unknown", type: "i32" },
+        { name: "localHitPoint", type: "vector3" }, { name: "orientation", type: "vector3" }, { name: "position", type: "vector3" }, { name: "target", type: "string" }, { name: "turretAngle", type: "f32" },
     ] },
 ] });
 export const ShotgunShot = def({ id: 471157826, name: "ShotgunShot", direction: "s2c", schema: [

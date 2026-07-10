@@ -20,7 +20,9 @@ export const FriendRequestDeclined = def({ id: -1885167992, name: "FriendRequest
 export const FriendRequestSent = def({ id: -1241704092, name: "FriendRequestSent", direction: "s2c", schema: NICK });
 export const FriendsList = def({ id: 1422563374, name: "FriendsList", direction: "s2c", schema: [{ name: "acceptedFriends", type: "nullableStringArray" }, { name: "newAcceptedFriends", type: "nullableStringArray" }, { name: "incomingRequests", type: "nullableStringArray" }, { name: "newIncomingRequests", type: "nullableStringArray" }, { name: "outgoingRequests", type: "nullableStringArray" }] });
 export const IncomingFriendRequestExists = def({ id: -1258754138, name: "IncomingFriendRequestExists", direction: "s2c", schema: NICK });
-export const LoadFriends = def({ id: -731115522, name: "LoadFriends", direction: "s2c", schema: [{ name: "unknown", type: "bool" }] });
+// Ex-"LoadFriends" (nome herdado errado): no client é ENVIADO pela janela de configurações
+// (no init e ao fechar) com o valor do checkbox "SHOW_DAMAGE" — não tem relação com amigos.
+export const SetShowDamageSetting = def({ id: -731115522, name: "SetShowDamageSetting", direction: "c2s", schema: [{ name: "showDamage", type: "bool" }] });
 export const NewFriendRequest = def({ id: 553380510, name: "NewFriendRequest", direction: "s2c", schema: NICK });
 export const RemoveFriend = def({ id: -221757454, name: "RemoveFriend", direction: "c2s", schema: NICK });
 export const UserExistsForFriend = def({ id: -707501253, name: "UserExistsForFriend", direction: "s2c", schema: [] });

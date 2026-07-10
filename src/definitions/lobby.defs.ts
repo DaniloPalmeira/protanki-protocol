@@ -213,9 +213,8 @@ export const SetBattleInviteSound = def({
 //
 // Nomes recuperados do client decompilado. No client o pacote são 7 objetos, achatados no fio:
 //   [0..9]  composite "user clan state" (codec: string, 8×bool/i32, byte no último int)
-//   [10..12] 3× Vector<Long> (ids de clã — no client NÃO são strings; listas vazias são
-//            byte-idênticas a nullableStringArray, por isso a validação passou. Se algum dia
-//            vierem não-vazias, o layout por item é i64, possivelmente com presence byte)
+//   [10..12] 3× listas de TAGS de clã (strings no wire — confirmado por captura com ["LGC"];
+//            o client converte tag→Long internamente, mas o codec é de string)
 //   [13..14] 2× Vector<String> (nicks)
 //   [15]    id de resource (Long hi/lo) da imagem do logo
 export const InitUserClanModels = def({
@@ -225,15 +224,18 @@ export const InitUserClanModels = def({
     schema: [
         // Tag do clã atual do usuário (null/"" = sem clã); vira o título "[TAG] nick".
         { name: "tag", type: "string" },
-        // Pedido de entrada pendente enviado pelo usuário (flag do painel "sem clã"). Confiança média.
-        { name: "requestPending", type: "bool" },
+        // Toggle "dar bônus ao clã" — o setter no client dispara "ClanUserInfoEvent.
+        // UPDATE_GIVE_BONUSES_CLAN". Sempre true nas 200 capturas.
+        { name: "giveBonusesToClan", type: "bool" },
         // Gate do módulo inteiro: se false, o init do clã é abortado no client.
         { name: "clansEnabled", type: "bool" },
         // Cooldown em segundos p/ entrar/criar clã ("RestrictionJoinClanEvent"; expira via setTimeout no client).
         { name: "joinCooldownSeconds", type: "i32" },
-        // Flag guardada no painel "sem clã"; nenhuma leitura localizada no client (aparentemente morta).
+        // Flag guardada no painel "sem clã"; nenhuma leitura localizada no client (aparentemente
+        // morta). Sempre true nas 200 capturas.
         { name: "unknownPanelFlag", type: "bool" },
-        // Negado e usado p/ travar/destravar botão de clã no lobby (state.enabled = !este). Confiança baixa.
+        // Negado e usado p/ travar/destravar botão de clã no lobby (state.enabled = !este).
+        // Sempre true nas 200 capturas; confiança baixa no nome.
         { name: "uiLocked", type: "bool" },
         // Custo em cristais p/ criar clã (usado no alert "CLAN_CREATE_CONFIRM_ALERT_BUY" e no check de saldo).
         { name: "createCost", type: "i32" },
@@ -243,12 +245,14 @@ export const InitUserClanModels = def({
         { name: "canCreateClan", type: "bool" },
         // Rank mínimo p/ criar clã (byte no codec oficial, como os demais ranks).
         { name: "minRankToCreate", type: "i8" },
-        // Ids (i64) dos clãs que convidaram o usuário (alimentada por ClanInviteNotify/ClanInviteAck).
-        { name: "incomingInviteClanIds", type: "nullableStringArray" },
-        // Ids (i64) dos clãs p/ os quais o usuário enviou pedido (JoinRequestSent/JoinRequestCancelled).
-        { name: "outgoingRequestClanIds", type: "nullableStringArray" },
-        // Ids (i64) de convites já visualizados (ViewInviteClanResponse). Confiança média.
-        { name: "viewedInviteClanIds", type: "nullableStringArray" },
+        // Tags dos clãs que convidaram o usuário (ClanInviteNotify/ClanInviteAck).
+        // Confirmado por captura: ["LGC"].
+        { name: "incomingInviteClanTags", type: "nullableStringArray" },
+        // Tags dos clãs p/ os quais o usuário enviou pedido (JoinRequestSent/JoinRequestCancelled).
+        // Confirmado por captura: ["LGC"].
+        { name: "outgoingRequestClanTags", type: "nullableStringArray" },
+        // Tags de convites já visualizados (ViewInviteClanResponse). Sempre vazia nas capturas.
+        { name: "viewedInviteClanTags", type: "nullableStringArray" },
         // Nicks de membros com notificação pendente (MemberStatusNotify/ClanLeaderNotify; par do MarkMemberSeen).
         { name: "memberNotificationNicks", type: "nullableStringArray" },
         // Nicks com pedido de entrada pendente NO clã do usuário (NotifyJoinRequest/RemoveJoinRequest).

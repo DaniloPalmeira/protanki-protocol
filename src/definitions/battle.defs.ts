@@ -42,7 +42,10 @@ export const ActivateTank = def({ id: 1868573511, name: "ActivateTank", directio
 export const ActivateSupplyCommand = def({ id: -2102525054, name: "ActivateSupplyCommand", direction: "c2s", schema: [{ name: "itemId", type: "string" }] });
 export const ActivatedSupply = def({ id: 2032104949, name: "ActivatedSupply", direction: "s2c", schema: [{ name: "itemId", type: "string" }, { name: "cooldownMs", type: "i32" }, { name: "flag", type: "i8" }] });
 export const UpdateConsumableCount = def({ id: -502907094, name: "UpdateConsumableCount", direction: "s2c", schema: [{ name: "itemId", type: "string" }, { name: "count", type: "i32" }] });
-export const EffectStarted = def({ id: -1639713644, name: "EffectStarted", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "effectType", type: "i32" }, { name: "durationMs", type: "i32" }, { name: "unknown", type: "i16" }] });
+// No client o "unknown i16" antigo são DOIS campos: bool activeAfterDeath (efeito não expira ao
+// morrer; o tick de contagem retorna cedo quando true) + byte effectLevel (nível do suprimento;
+// level 2 troca o ícone exibido).
+export const EffectStarted = def({ id: -1639713644, name: "EffectStarted", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "effectType", type: "i32" }, { name: "durationMs", type: "i32" }, { name: "activeAfterDeath", type: "bool" }, { name: "effectLevel", type: "i8" }] });
 export const EffectStopped = def({ id: -1994318624, name: "EffectStopped", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "effectType", type: "i32" }] });
 export const ConfirmDestruction = def({ id: -173682854, name: "ConfirmDestruction", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "delaytoSpawn", type: "i32" }] });
 export const DamageIndicator = def({ id: -1165230470, name: "DamageIndicator", direction: "s2c", schema: [{ name: "count", type: "i32" }, { name: "damage", type: "f32" }, { name: "damageType", type: "i32" }, { name: "target", type: "string" }] });
