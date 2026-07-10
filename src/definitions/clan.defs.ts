@@ -13,7 +13,7 @@ const NAME = fields([{ name: "name", type: "string" }]);
 // Modelo LIGHT de clã (my-clan window field0, join-request card, ratings list). Ordem validada byte-a-byte.
 const LIGHT_CLAN_MODEL: PacketSchema = [
     { name: "f1", type: "u8" }, { name: "clanId", type: "i64" }, { name: "leader", type: "string" }, { name: "description", type: "string" },
-    { name: "recruiting", type: "bool" }, { name: "f6", type: "i32" }, { name: "f7", type: "i32" }, { name: "minRank", type: "i8" },
+    { name: "recruiting", type: "bool" }, { name: "f6", type: "i32" }, { name: "f7", type: "i32" }, { name: "minRank", type: "u8" },
     { name: "name", type: "string" }, { name: "s10", type: "string" }, { name: "f11", type: "u8" }, { name: "tag", type: "string" },
     { name: "memberNicks", type: "stringArray" }, { name: "logo", type: "string" }, { name: "rating", type: "i32" },
 ];
@@ -55,7 +55,7 @@ export const CheckInviteUser = def({ id: 819097883, name: "CheckInviteUser", dir
 export const InviteUserValid = def({ id: 1796904481, name: "InviteUserValid", direction: "s2c", schema: [] });
 export const InviteUserInvalid = def({ id: -616439158, name: "InviteUserInvalid", direction: "s2c", schema: [] });
 export const SetClanDescription = def({ id: -1752335888, name: "SetClanDescription", direction: "both", schema: [{ name: "description", type: "string" }] });
-export const SetClanMinRank = def({ id: -1145619463, name: "SetClanMinRank", direction: "c2s", schema: [{ name: "minRank", type: "i8" }] });
+export const SetClanMinRank = def({ id: -1145619463, name: "SetClanMinRank", direction: "c2s", schema: [{ name: "minRank", type: "u8" }] });
 export const SetClanRecruiting = def({ id: -614563927, name: "SetClanRecruiting", direction: "c2s", schema: [{ name: "recruiting", type: "bool" }] });
 export const SendClanInvite = def({ id: -2053489715, name: "SendClanInvite", direction: "c2s", schema: USER });
 export const ClanInviteSentAck = def({ id: 1921140979, name: "ClanInviteSentAck", direction: "s2c", schema: USER });
@@ -88,7 +88,7 @@ export const ClanLeaderNotify = def({ id: -915300943, name: "ClanLeaderNotify", 
 // Card de pedido de entrada: tag externa + um light model com layout PRÓPRIO (não é o LIGHT_CLAN_MODEL).
 export const JoinRequestModel = def({ id: 325031295, name: "JoinRequestModel", direction: "s2c", schema: [
     { name: "outerTag", type: "string" }, { name: "f1", type: "u8" }, { name: "clanId", type: "i64" }, { name: "leader", type: "string" },
-    { name: "recruiting", type: "bool" }, { name: "f6", type: "u8" }, { name: "f7", type: "i32" }, { name: "f8", type: "i32" }, { name: "minRank", type: "i8" },
+    { name: "recruiting", type: "bool" }, { name: "f6", type: "u8" }, { name: "f7", type: "i32" }, { name: "f8", type: "i32" }, { name: "minRank", type: "u8" },
     { name: "name", type: "string" }, { name: "f11", type: "u8" }, { name: "f12", type: "u8" }, { name: "tag", type: "string" },
     { name: "memberNicks", type: "stringArray" }, { name: "logo", type: "string" }, { name: "rating", type: "i32" },
 ] });
@@ -115,9 +115,10 @@ export const ShowForeignClanWindow = def({ id: -1855118498, name: "ShowForeignCl
     { name: "recruiting", type: "bool" },
     // Limite de membros do clã (lado servidor; o client carrega mas não lê este campo).
     { name: "maxMembers", type: "i32" },
-    // true → esconde o botão de entrada (provável "é o seu próprio clã"). Confiança baixa.
+    // true → esconde o botão de entrada. Estado do USUÁRIO, não do clã (nas capturas o mesmo clã
+    // aparece com true/false em sessões diferentes) — provável "você já está em um clã".
     { name: "joinHidden", type: "bool" },
-    // Rank mínimo p/ pedir entrada (byte; se > rank do usuário, esconde o botão).
+    // Rank mínimo p/ pedir entrada (byte assinado; -1 = sem mínimo, como nos outros models).
     { name: "minRank", type: "u8" },
     { name: "name", type: "string" },
     // Mensagem exibida quando blocked=true (slot do CLAN_BLOCK).
