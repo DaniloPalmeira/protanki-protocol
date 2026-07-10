@@ -136,3 +136,4 @@ dist
 .pnp.*
 client-decompiled/*
 captures/*
+FIELD-NAMING.md
