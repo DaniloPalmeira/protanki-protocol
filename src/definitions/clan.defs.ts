@@ -10,12 +10,16 @@ const USER = fields([{ name: "username", type: "string" }]);
 const TAG = fields([{ name: "tag", type: "string" }]);
 const NAME = fields([{ name: "name", type: "string" }]);
 
-// Modelo LIGHT de clã (my-clan window field0, join-request card, ratings list). Ordem validada byte-a-byte.
+// Modelo LIGHT de clã (my-clan window field0, ratings list). Ordem validada byte-a-byte.
+// Nomes recuperados do client decompilado — mesma família do composite do ShowForeignClanWindow:
+// blocked/blockReason alimentam o slot do CLAN_BLOCK; creationDate vira new Date(Number(x));
+// maxDescriptionLength é o limite do input de descrição da janela (nome=30, tag=5 são hardcoded);
+// editable gate os controles de edição (visible = !blocked && editable && temPermissão).
 const LIGHT_CLAN_MODEL: PacketSchema = [
-    { name: "f1", type: "u8" }, { name: "clanId", type: "i64" }, { name: "leader", type: "string" }, { name: "description", type: "string" },
-    { name: "recruiting", type: "bool" }, { name: "f6", type: "i32" }, { name: "f7", type: "i32" }, { name: "minRank", type: "u8" },
-    { name: "name", type: "string" }, { name: "s10", type: "string" }, { name: "f11", type: "u8" }, { name: "tag", type: "string" },
-    { name: "memberNicks", type: "stringArray" }, { name: "logo", type: "string" }, { name: "rating", type: "i32" },
+    { name: "blocked", type: "bool" }, { name: "creationDate", type: "i64" }, { name: "founder", type: "string" }, { name: "description", type: "string" },
+    { name: "recruiting", type: "bool" }, { name: "maxDescriptionLength", type: "i32" }, { name: "maxMembers", type: "i32" }, { name: "minRank", type: "u8" },
+    { name: "name", type: "string" }, { name: "blockReason", type: "string" }, { name: "editable", type: "bool" }, { name: "tag", type: "string" },
+    { name: "memberNicks", type: "stringArray" }, { name: "logo", type: "string" }, { name: "score", type: "i32" },
 ];
 // Modelo de 10 campos do membro (Long lastOnlineDate = i64).
 const MEMBER_MODEL: PacketSchema = [
