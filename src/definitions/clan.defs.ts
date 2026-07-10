@@ -104,7 +104,7 @@ export const ShowNotInClanWindow = def({ id: 560344632, name: "ShowNotInClanWind
 // labels CLAN_*) fixa a semântica de cada um.
 export const ShowForeignClanWindow = def({ id: -1855118498, name: "ShowForeignClanWindow", direction: "s2c", schema: [
     // Clã bloqueado (esconde o botão de entrada; par do blockReason e do evento CLAN_BLOCK).
-    { name: "blocked", type: "u8" },
+    { name: "blocked", type: "bool" },
     // Data de criação em ms epoch — a UI faz new Date(Number(x)) p/ "CLAN_CREATION_DATE_WITH_COLON".
     // (Antes nomeado clanId — o client NÃO trata como id.)
     { name: "creationDate", type: "i64" },
@@ -116,16 +116,16 @@ export const ShowForeignClanWindow = def({ id: -1855118498, name: "ShowForeignCl
     // Limite de membros do clã (lado servidor; o client carrega mas não lê este campo).
     { name: "maxMembers", type: "i32" },
     // true → esconde o botão de entrada (provável "é o seu próprio clã"). Confiança baixa.
-    { name: "joinHidden", type: "u8" },
+    { name: "joinHidden", type: "bool" },
     // Rank mínimo p/ pedir entrada (byte; se > rank do usuário, esconde o botão).
     { name: "minRank", type: "u8" },
     { name: "name", type: "string" },
     // Mensagem exibida quando blocked=true (slot do CLAN_BLOCK).
     { name: "blockReason", type: "string" },
-    // true → o clã convidou você (botão vira "CLAN_ACCEPT_REQUEST").
-    { name: "invitedYou", type: "u8" },
-    // true → você já enviou pedido (botão vira "CLAN_REMOVE_REQUEST_TO_CLAN").
-    { name: "requestSent", type: "u8" },
+    // true → você recebeu convite p/ entrar neste clã (botão vira "CLAN_ACCEPT_REQUEST").
+    { name: "invitedYou", type: "bool" },
+    // true → você pediu p/ entrar neste clã (botão vira "CLAN_REMOVE_REQUEST_TO_CLAN").
+    { name: "requestSent", type: "bool" },
     { name: "tag", type: "string" },
     { name: "members", type: "list", of: MEMBER_MODEL },
     // URL/resource string do logo (vai junto com a tag pro loader da janela).
