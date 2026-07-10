@@ -15,6 +15,9 @@ const NAME = fields([{ name: "name", type: "string" }]);
 // blocked/blockReason alimentam o slot do CLAN_BLOCK; creationDate vira new Date(Number(x));
 // maxDescriptionLength é o limite do input de descrição da janela (nome=30, tag=5 são hardcoded);
 // editable gate os controles de edição (visible = !blocked && editable && temPermissão).
+// NOTA: na janela de ratings (SetClanRatingsData) o client só lê name/tag/founder/
+// memberNicks.length/score/creationDate/logo — o resto (editable, blocked, recruiting,
+// minRank, maxMembers, description...) é ignorado nesse fluxo e pode ir com defaults.
 const LIGHT_CLAN_MODEL: PacketSchema = [
     { name: "blocked", type: "bool" }, { name: "creationDate", type: "i64" }, { name: "founder", type: "string" }, { name: "description", type: "string" },
     { name: "recruiting", type: "bool" }, { name: "maxDescriptionLength", type: "i32" }, { name: "maxMembers", type: "i32" }, { name: "minRank", type: "u8" },
