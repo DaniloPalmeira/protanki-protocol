@@ -208,26 +208,53 @@ export const SetBattleInviteSound = def({
 // os VALORES (constantes + requestTags + podium) o server fornece. Ordem/tipos batem com a captura
 // oficial (2026-06-18). `requestTags` = Vector<String> bare (int32 count + optString) = tipo `list`.
 // Forma OFICIAL do ProTanki (validada byte-a-byte contra capturas, inclusive o caso com
-// pedido de entrada pendente). Campos f0..f15 são posicionais (o client decompilado não
-// preservou os nomes). NOTA: o letanki-server envia uma forma DIFERENTE (ver o override
+// pedido de entrada pendente). NOTA: o letanki-server envia uma forma DIFERENTE (ver o override
 // local em InitUserClanModelsPacket) — ele diverge do oficial neste pacote.
+//
+// Nomes recuperados do client decompilado. No client o pacote são 7 objetos, achatados no fio:
+//   [0..9]  composite "user clan state" (codec: string, 8×bool/i32, byte no último int)
+//   [10..12] 3× Vector<Long> (ids de clã — no client NÃO são strings; listas vazias são
+//            byte-idênticas a nullableStringArray, por isso a validação passou. Se algum dia
+//            vierem não-vazias, o layout por item é i64, possivelmente com presence byte)
+//   [13..14] 2× Vector<String> (nicks)
+//   [15]    id de resource (Long hi/lo) da imagem do logo
 export const InitUserClanModels = def({
     id: -1338449818,
     name: "InitUserClanModels",
     direction: "s2c",
     schema: [
-        { name: "f0", type: "string" },
-        { name: "f1", type: "bool" }, { name: "f2", type: "bool" },
-        { name: "f3", type: "i32" },
-        { name: "f4", type: "bool" }, { name: "f5", type: "bool" },
-        { name: "f6", type: "i32" }, { name: "f7", type: "i32" },
-        { name: "f8", type: "bool" }, { name: "f9", type: "i8" },
-        { name: "f10", type: "nullableStringArray" },
-        { name: "f11", type: "nullableStringArray" },
-        { name: "f12", type: "nullableStringArray" },
-        { name: "f13", type: "nullableStringArray" },
-        { name: "f14", type: "nullableStringArray" },
-        { name: "f15", type: "longPair" },
+        // Tag do clã atual do usuário (null/"" = sem clã); vira o título "[TAG] nick".
+        { name: "tag", type: "string" },
+        // Pedido de entrada pendente enviado pelo usuário (flag do painel "sem clã"). Confiança média.
+        { name: "requestPending", type: "bool" },
+        // Gate do módulo inteiro: se false, o init do clã é abortado no client.
+        { name: "clansEnabled", type: "bool" },
+        // Cooldown em segundos p/ entrar/criar clã ("RestrictionJoinClanEvent"; expira via setTimeout no client).
+        { name: "joinCooldownSeconds", type: "i32" },
+        // Flag guardada no painel "sem clã"; nenhuma leitura localizada no client (aparentemente morta).
+        { name: "unknownPanelFlag", type: "bool" },
+        // Negado e usado p/ travar/destravar botão de clã no lobby (state.enabled = !este). Confiança baixa.
+        { name: "uiLocked", type: "bool" },
+        // Custo em cristais p/ criar clã (usado no alert "CLAN_CREATE_CONFIRM_ALERT_BUY" e no check de saldo).
+        { name: "createCost", type: "i32" },
+        // Contagem inicial do badge de notificações do painel de clã ("ClanPanelNotificationEvent.UPDATE").
+        { name: "notificationsCount", type: "i32" },
+        // Rank suficiente p/ criar clã; o client recalcula como rank >= minRankToCreate ao subir de rank.
+        { name: "canCreateClan", type: "bool" },
+        // Rank mínimo p/ criar clã (byte no codec oficial, como os demais ranks).
+        { name: "minRankToCreate", type: "i8" },
+        // Ids (i64) dos clãs que convidaram o usuário (alimentada por ClanInviteNotify/ClanInviteAck).
+        { name: "incomingInviteClanIds", type: "nullableStringArray" },
+        // Ids (i64) dos clãs p/ os quais o usuário enviou pedido (JoinRequestSent/JoinRequestCancelled).
+        { name: "outgoingRequestClanIds", type: "nullableStringArray" },
+        // Ids (i64) de convites já visualizados (ViewInviteClanResponse). Confiança média.
+        { name: "viewedInviteClanIds", type: "nullableStringArray" },
+        // Nicks de membros com notificação pendente (MemberStatusNotify/ClanLeaderNotify; par do MarkMemberSeen).
+        { name: "memberNotificationNicks", type: "nullableStringArray" },
+        // Nicks com pedido de entrada pendente NO clã do usuário (NotifyJoinRequest/RemoveJoinRequest).
+        { name: "joinRequestNicks", type: "nullableStringArray" },
+        // Id do resource da imagem de logo do clã (Long = hi/lo), carregado pelo loader "IMG".
+        { name: "logoImageId", type: "longPair" },
     ],
 });
 
