@@ -92,12 +92,12 @@ export const ClanNameNotify = def({ id: -1673544562, name: "ClanNameNotify", dir
 export const AddClanMember = def({ id: 1741285576, name: "AddClanMember", direction: "s2c", schema: MEMBER_MODEL });
 export const MemberAddedNotify = def({ id: 385150953, name: "MemberAddedNotify", direction: "s2c", schema: USER });
 export const ClanLeaderNotify = def({ id: -915300943, name: "ClanLeaderNotify", direction: "s2c", schema: [{ name: "nick", type: "string" }] });
-// Card de pedido de entrada: tag externa + um light model com layout PRÓPRIO (não é o LIGHT_CLAN_MODEL).
+// Card de pedido de entrada. No client é { tag, clan: <mesmo composite LIGHT do ratings/my-clan> }
+// (codec "class use default" — NÃO é um layout próprio). O def "achatado" antigo só validava porque
+// description/blockReason vinham null (o presence byte da string nula parecia um u8 avulso).
 export const JoinRequestModel = def({ id: 325031295, name: "JoinRequestModel", direction: "s2c", schema: [
-    { name: "outerTag", type: "string" }, { name: "f1", type: "u8" }, { name: "clanId", type: "i64" }, { name: "leader", type: "string" },
-    { name: "recruiting", type: "bool" }, { name: "f6", type: "u8" }, { name: "f7", type: "i32" }, { name: "f8", type: "i32" }, { name: "minRank", type: "u8" },
-    { name: "name", type: "string" }, { name: "f11", type: "u8" }, { name: "f12", type: "u8" }, { name: "tag", type: "string" },
-    { name: "memberNicks", type: "stringArray" }, { name: "logo", type: "string" }, { name: "rating", type: "i32" },
+    { name: "tag", type: "string" },
+    { name: "clan", type: "object", of: LIGHT_CLAN_MODEL },
 ] });
 export const JoinRequestSent = def({ id: -905757704, name: "JoinRequestSent", direction: "s2c", schema: TAG });
 export const JoinRequestCancelled = def({ id: -2007179326, name: "JoinRequestCancelled", direction: "s2c", schema: TAG });
