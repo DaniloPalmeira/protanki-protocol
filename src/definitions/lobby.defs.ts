@@ -275,6 +275,17 @@ export const InitNewbieBonus = def({ id: 29211250, name: "InitNewbieBonus", dire
     { name: "windowImageId", type: "longPair" },
 ] });
 
+// S->C: notícias da janela "NEWS_HEADER" do lobby (modelo 68). Cada item vira uma linha com
+// imagem (Loader na URL), data (texto pequeno no topo) e corpo em HTML.
+// Captura: [{ ".../icons/xt.png", "20.06.2026", "<div>Como um TROVÃO..." }].
+export const InitNews = def({ id: -260270890, name: "InitNews", direction: "s2c", schema: [
+    { name: "news", type: "list", of: [
+        { name: "imageUrl", type: "string" },
+        { name: "date", type: "string" },
+        { name: "textHtml", type: "string" },
+    ] },
+] });
+
 export const OnReserveSlotTeam = def({
     id: -169305322,
     name: "OnReserveSlotTeam",
