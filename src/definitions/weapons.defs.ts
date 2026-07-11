@@ -18,6 +18,9 @@ export const RailgunShot = def({ id: -369590613, name: "RailgunShot", direction:
 ] });
 export const StartChargingCommand = def({ id: -1759063234, name: "StartChargingCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }] });
 export const StartCharging = def({ id: 346830254, name: "StartCharging", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
+// Par "tiro sem alvo" do railgun (raio não tocou nada; client toca só flash+recuo).
+export const RailgunShotNoTargetCommand = def({ id: -18176641, name: "RailgunShotNoTargetCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }] });
+export const RailgunShotNoTarget = def({ id: 1459211021, name: "RailgunShotNoTarget", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
 
 // ===== thunder =====
 export const ThunderShotNoTargetCommand = def({ id: -136344740, name: "ThunderShotNoTargetCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }] });
@@ -41,6 +44,11 @@ export const SmokyTargetShot = def({ id: -1334002026, name: "SmokyTargetShot", d
     { name: "nickname", type: "string" }, { name: "targetNickname", type: "string" }, { name: "hitPosition", type: "vector3" },
     { name: "impactForce", type: "f32" }, { name: "critical", type: "bool" },
 ] });
+// Par "tiro sem alvo" do smoky (raycast não tocou nada).
+export const SmokyShotNoTargetCommand = def({ id: 1478921140, name: "SmokyShotNoTargetCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }] });
+export const SmokyShotNoTarget = def({ id: -1032328347, name: "SmokyShotNoTarget", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
+// Efeito de dano crítico do smoky sobre o alvo (client toca efeito na torreta do tanque alvo).
+export const SmokyCriticalHit = def({ id: -671618989, name: "SmokyCriticalHit", direction: "s2c", schema: [{ name: "target", type: "string" }] });
 
 // ===== twins =====
 export const TwinsShotCommand = def({ id: -159686980, name: "TwinsShotCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }, { name: "control", type: "i8" }, { name: "shotId", type: "i32" }, { name: "direction", type: "vector3" }] });
@@ -50,6 +58,10 @@ export const TwinsShot = def({ id: -44282936, name: "TwinsShot", direction: "s2c
 // 1º vec3 = posição do alvo (mesmo slot/campo do Ricochet; z = altura do chão nas capturas);
 // 2º vec3 = ponto de impacto.
 export const TwinsTargetShotCommand = def({ id: -1723353904, name: "TwinsTargetShotCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }, { name: "shotId", type: "i32" }, { name: "target", type: "string" }, { name: "targetPosition", type: "vector3" }, { name: "hitPoint", type: "vector3" }] });
+// Projétil do twins atingiu geometria estática.
+export const TwinsStaticShotCommand = def({ id: -482023661, name: "TwinsStaticShotCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }, { name: "shotId", type: "i32" }, { name: "hitPoint", type: "vector3" }] });
+// Relay "fire dummy" do twins: flash/som no cano indicado, sem projétil.
+export const TwinsShotNoTarget = def({ id: -328554480, name: "TwinsShotNoTarget", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "barrel", type: "i8" }] });
 
 // ===== ricochet =====
 export const RicochetShotCommand = def({ id: -1907971330, name: "RicochetShotCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }, { name: "shortId", type: "i32" }, { name: "x", type: "i16" }, { name: "y", type: "i16" }, { name: "z", type: "i16" }] });
@@ -61,6 +73,8 @@ export const RicochetTargetShotCommand = def({ id: 1229701582, name: "RicochetTa
     { name: "hitPoints", type: "nullableList", of: [{ name: "v", type: "vector3" }] },
 ] });
 export const RicochetShot = def({ id: -118119523, name: "RicochetShot", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "x", type: "i16" }, { name: "y", type: "i16" }, { name: "z", type: "i16" }] });
+// Relay "fire dummy" do ricochet (disparo sem alvo).
+export const RicochetShotNoTarget = def({ id: -1670466290, name: "RicochetShotNoTarget", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
 
 // ===== shaft =====
 // Estrutura REAL do client (o antigo hack head/tail só cobria 0–1 alvo; o Shaft perfura vários).
@@ -84,6 +98,8 @@ export const ShaftEnterAiming = def({ id: -367760678, name: "ShaftEnterAiming", 
 export const ShaftAimEngaged = def({ id: -1487306515, name: "ShaftAimEngaged", direction: "c2s", schema: [] });
 export const ShaftExitAiming = def({ id: 843751647, name: "ShaftExitAiming", direction: "c2s", schema: [] });
 export const ShaftAimEnterRelay = def({ id: -1222085753, name: "ShaftAimEnterRelay", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
+// Relay "tiro sem alvo" do shaft (só o efeito visual do disparo).
+export const ShaftShotNoTarget = def({ id: -1380283560, name: "ShaftShotNoTarget", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
 export const ShaftAimExitRelay = def({ id: -380595194, name: "ShaftAimExitRelay", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
 // ShaftShot s2c: estrutura REAL do client (substitui as variantes hit/miss com pads —
 // no wire é UM schema só; miss = targets/hitPoints null).

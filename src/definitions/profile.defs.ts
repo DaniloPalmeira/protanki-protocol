@@ -10,6 +10,9 @@ export const AchievementTips = def({ id: -1481254568, name: "AchievementTips", d
 export const EmailInfo = def({ id: 613462801, name: "EmailInfo", direction: "s2c", schema: [{ name: "email", type: "string" }, { name: "emailConfirmed", type: "bool" }] });
 export const PremiumInfo = def({ id: 1405859779, name: "PremiumInfo", direction: "s2c", schema: [{ name: "needShowNotificationCompletionPremium", type: "bool" }, { name: "needShowWelcomeAlert", type: "bool" }, { name: "reminderCompletionPremiumTime", type: "f32" }, { name: "wasShowAlertForFirstPurchasePremium", type: "bool" }, { name: "wasShowReminderCompletionPremium", type: "bool" }, { name: "lifeTimeInSeconds", type: "i32" }] });
 export const UpdateCrystals = def({ id: -593513288, name: "UpdateCrystals", direction: "s2c", schema: [{ name: "crystals", type: "i32" }] });
+// Atualiza rating + posição no top (modelo 29). Mesmos campos rating/place do LobbyData
+// (place provavelmente 0-based como lá). Amostra: rating=938.0, place=63275.
+export const UpdateRating = def({ id: -1128606444, name: "UpdateRating", direction: "s2c", schema: [{ name: "rating", type: "f32" }, { name: "place", type: "i32" }] });
 export const UpdateScore = def({ id: 2116086491, name: "UpdateScore", direction: "s2c", schema: [{ name: "score", type: "i32" }] });
 export const UpdateRank = def({ id: 1989173907, name: "UpdateRank", direction: "s2c", schema: [{ name: "rank", type: "i32" }, { name: "score", type: "i32" }, { name: "currentRankScore", type: "i32" }, { name: "nextRankScore", type: "i32" }, { name: "reward", type: "i32" }] });
 export const UpdatePremiumTime = def({ id: 1391146385, name: "UpdatePremiumTime", direction: "s2c", schema: [{ name: "timeLeft", type: "i32" }] });

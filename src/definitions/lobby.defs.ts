@@ -186,6 +186,12 @@ export const NotifyFriendOfBattle = def({
     ],
 });
 
+// Atualiza kills de um jogador no roster do lobby (modelo 33). O proxy de capturas já
+// chamava de "UpdateUserKillsPacket". 18k+ ocorrências nas capturas.
+export const UpdateUserKills = def({ id: -1263036614, name: "UpdateUserKills", direction: "s2c", schema: [
+    { name: "battleId", type: "string" }, { name: "nickname", type: "string" }, { name: "kills", type: "i32" },
+] });
+
 export const UnloadBattleList = def({
     id: -324155151,
     name: "UnloadBattleList",
