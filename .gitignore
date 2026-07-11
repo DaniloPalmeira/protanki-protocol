@@ -137,3 +137,4 @@ dist
 client-decompiled/*
 captures/*
 FIELD-NAMING.md
+docs-internal/
