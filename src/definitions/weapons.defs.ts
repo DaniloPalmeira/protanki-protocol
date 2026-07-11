@@ -46,11 +46,20 @@ export const SmokyTargetShot = def({ id: -1334002026, name: "SmokyTargetShot", d
 export const TwinsShotCommand = def({ id: -159686980, name: "TwinsShotCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }, { name: "control", type: "i8" }, { name: "shotId", type: "i32" }, { name: "direction", type: "vector3" }] });
 export const TwinsShot = def({ id: -44282936, name: "TwinsShot", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "control", type: "i8" }, { name: "direction", type: "vector3" }] });
 // Cauda opcional (miss manda pacote curto): server lê head [clientTime, shotId] e, se sobrar, o tail.
-export const TwinsTargetShotCommand = def({ id: -1723353904, name: "TwinsTargetShotCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }, { name: "shotId", type: "i32" }, { name: "target", type: "string" }, { name: "hitGlobalPosition", type: "vector3" }] });
+// Estrutura real do client: 2 vec3 no fim (o def antigo deixava 13B sobrando — faltava o 2º vec3).
+// 1º vec3 = posição do alvo (mesmo slot/campo do Ricochet; z = altura do chão nas capturas);
+// 2º vec3 = ponto de impacto.
+export const TwinsTargetShotCommand = def({ id: -1723353904, name: "TwinsTargetShotCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }, { name: "shotId", type: "i32" }, { name: "target", type: "string" }, { name: "targetPosition", type: "vector3" }, { name: "hitPoint", type: "vector3" }] });
 
 // ===== ricochet =====
 export const RicochetShotCommand = def({ id: -1907971330, name: "RicochetShotCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }, { name: "shortId", type: "i32" }, { name: "x", type: "i16" }, { name: "y", type: "i16" }, { name: "z", type: "i16" }] });
-export const RicochetTargetShotCommand = def({ id: 1229701582, name: "RicochetTargetShotCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }, { name: "target", type: "string" }] });
+// Estrutura real do client (o def antigo deixava 48B sobrando): shotId + posição do alvo +
+// lista de pontos de impacto (os quiques do ricochet no alvo).
+export const RicochetTargetShotCommand = def({ id: 1229701582, name: "RicochetTargetShotCommand", direction: "c2s", schema: [
+    { name: "clientTime", type: "i32" }, { name: "target", type: "string" }, { name: "shotId", type: "i32" },
+    { name: "targetPosition", type: "vector3" },
+    { name: "hitPoints", type: "nullableList", of: [{ name: "v", type: "vector3" }] },
+] });
 export const RicochetShot = def({ id: -118119523, name: "RicochetShot", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "x", type: "i16" }, { name: "y", type: "i16" }, { name: "z", type: "i16" }] });
 
 // ===== shaft =====
@@ -71,7 +80,7 @@ export const ShaftArcadeShotCommand = def({ id: -2030760866, name: "ShaftArcadeS
 export const ShaftAimingShotCommand = def({ id: 1632423559, name: "ShaftAimingShotCommand", direction: "c2s", schema: ShaftShotCommandSchema });
 export const ShaftAimTrackCommand = def({ id: -1517837003, name: "ShaftAimTrackCommand", direction: "c2s", schema: [{ name: "target", type: "string" }, { name: "direction", type: "vector3" }] });
 export const ShaftAimTrack = def({ id: 11992250, name: "ShaftAimTrack", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "target", type: "string" }, { name: "direction", type: "vector3" }] });
-export const ShaftEnterAiming = def({ id: -367760678, name: "ShaftEnterAiming", direction: "c2s", schema: [] });
+export const ShaftEnterAiming = def({ id: -367760678, name: "ShaftEnterAiming", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }] });
 export const ShaftAimEngaged = def({ id: -1487306515, name: "ShaftAimEngaged", direction: "c2s", schema: [] });
 export const ShaftExitAiming = def({ id: 843751647, name: "ShaftExitAiming", direction: "c2s", schema: [] });
 export const ShaftAimEnterRelay = def({ id: -1222085753, name: "ShaftAimEnterRelay", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
@@ -88,18 +97,65 @@ export const ShaftShot = def({ id: 1184835319, name: "ShaftShot", direction: "s2
 
 // ===== flamethrower =====
 // HitCommand: lê só clientTime + targets (o resto do fio — short + 2 vec-arrays — é ignorado).
-export const FirebirdHitCommand = def({ id: 1395251766, name: "FirebirdHitCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }, { name: "targets", type: "stringArray" }] });
+// Estrutura real do client (o def antigo ignorava a cauda — 43B sobrando): vetores paralelos
+// por alvo, com incarnations em i16/item (mesmo codec do Shaft).
+export const FirebirdHitCommand = def({ id: 1395251766, name: "FirebirdHitCommand", direction: "c2s", schema: [
+    { name: "clientTime", type: "i32" },
+    { name: "targets", type: "nullableStringArray" },
+    { name: "incarnations", type: "nullableList", of: [{ name: "i", type: "i16" }] },
+    { name: "targetPositions", type: "nullableList", of: [{ name: "v", type: "vector3" }] },
+    { name: "hitPoints", type: "nullableList", of: [{ name: "v", type: "vector3" }] },
+] });
 export const StartShootingFlamethrowerCommand = def({ id: -1986638927, name: "StartShootingFlamethrowerCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }] });
 export const StartShootingFlamethrower = def({ id: 1212381771, name: "StartShootingFlamethrower", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
 export const StopShootingFlamethrowerCommand = def({ id: -1300958299, name: "StopShootingFlamethrowerCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }] });
 export const StopShootingFlamethrower = def({ id: 1333088437, name: "StopShootingFlamethrower", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
 
 // ===== freeze =====
-export const FreezeHitCommand = def({ id: -2123941185, name: "FreezeHitCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }, { name: "targets", type: "stringArray" }] });
+// Mesma forma do FirebirdHitCommand (classe irmã no client).
+export const FreezeHitCommand = def({ id: -2123941185, name: "FreezeHitCommand", direction: "c2s", schema: [
+    { name: "clientTime", type: "i32" },
+    { name: "targets", type: "nullableStringArray" },
+    { name: "incarnations", type: "nullableList", of: [{ name: "i", type: "i16" }] },
+    { name: "targetPositions", type: "nullableList", of: [{ name: "v", type: "vector3" }] },
+    { name: "hitPoints", type: "nullableList", of: [{ name: "v", type: "vector3" }] },
+] });
 export const StartShootingFreezeCommand = def({ id: -75406982, name: "StartShootingFreezeCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }] });
 export const StartShootingFreeze = def({ id: -1171353580, name: "StartShootingFreeze", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
 export const StopShootingFreezeCommand = def({ id: -1654947652, name: "StopShootingFreezeCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }] });
 export const StopShootingFreeze = def({ id: 979099084, name: "StopShootingFreeze", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
+
+// ===== isis (modelo/space 55 no client) =====
+// Módulo do Isis (arma de cura/dano contínuo). Codec do enum aparece SEM ofuscação no client:
+// "CodecIsisState" (i32 ordinal 0..3; amostra: 3 com alvo aliado — provável 0=idle e
+// healing/damaging entre 1..3, mapeamento exato não confirmado).
+export const IsisStartCommand = def({ id: -248693565, name: "IsisStartCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }] });
+// §function for var§ é chamado no client ao DESLIGAR o jato (set enabled=false / cleanup).
+export const IsisStopCommand = def({ id: -1051248475, name: "IsisStopCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }] });
+// Tick periódico enquanto o jato toca um alvo (incarnation = i16, codec "set var break" = short).
+export const IsisTargetTickCommand = def({ id: 381067984, name: "IsisTargetTickCommand", direction: "c2s", schema: [
+    { name: "clientTime", type: "i32" }, { name: "target", type: "string" },
+    { name: "incarnation", type: "i16" }, { name: "localHitPoint", type: "vector3" },
+] });
+// Variante SEM id do alvo (posição+incarnation apenas) — enviada por outro caminho do controller
+// (provável engate/validação de alvo). Semântica exata com confiança média.
+export const IsisTargetPositionCommand = def({ id: 244072998, name: "IsisTargetPositionCommand", direction: "c2s", schema: [
+    { name: "clientTime", type: "i32" }, { name: "incarnation", type: "i16" },
+    { name: "targetPosition", type: "vector3" }, { name: "localHitPoint", type: "vector3" },
+] });
+// Relay s2c do estado do Isis de outro jogador. targetData.position é um vector3 anulável
+// (null-flag do próprio tipo); incarnation aqui é i8 (byte), diferente dos commands (i16).
+export const SetIsisState = def({ id: 2001632000, name: "SetIsisState", direction: "s2c", schema: [
+    { name: "nickname", type: "string" },
+    { name: "state", type: "i32" },
+    { name: "position", type: "vector3" },
+    { name: "localHitPoint", type: "vector3" },
+    { name: "incarnation", type: "i8" },
+    { name: "target", type: "string" },
+] });
+// Par start/stop s2c ({nickname}); mapeamento start×stop com confiança média (contagens 872/858).
+export const StartShootingIsis = def({ id: -1271729363, name: "StartShootingIsis", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
+export const StopShootingIsis = def({ id: 981035905, name: "StopShootingIsis", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
 
 // ===== machinegun =====
 export const StartShootingMachinegunCommand = def({ id: -520655432, name: "StartShootingMachinegunCommand", direction: "c2s", schema: [{ name: "clientTime", type: "i32" }] });
