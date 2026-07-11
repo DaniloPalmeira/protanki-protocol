@@ -262,6 +262,19 @@ export const InitUserClanModels = def({
     ],
 });
 
+// S->C: modelo do PASSE INICIANTE (newbie abonement), enviado logo após criar a conta.
+// Estrutura REAL do client: 3×i32 + resource de imagem (Long hi/lo) — os antigos f3/f4 eram o
+// par hi/low do resource id (captura: hi=0, low=8632 = imagem da janela). O client monta a janela
+// "NEWBIES_ABONEMENT_WINDOW_TEXT" com endDate = now + durationSeconds*1000 e substitui os
+// placeholders CRYSTAL_BONUS/EXPERIENCE_BONUS pelos percentuais.
+// Captura pós-CreateAccount: [1814400 (21 dias), 100, 50, imagem 8632].
+export const InitNewbieBonus = def({ id: 29211250, name: "InitNewbieBonus", direction: "s2c", schema: [
+    { name: "durationSeconds", type: "i32" },
+    { name: "crystalBonusPercent", type: "i32" },
+    { name: "experienceBonusPercent", type: "i32" },
+    { name: "windowImageId", type: "longPair" },
+] });
+
 export const OnReserveSlotTeam = def({
     id: -169305322,
     name: "OnReserveSlotTeam",
