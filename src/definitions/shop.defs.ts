@@ -8,3 +8,14 @@ export const SetShopCountry = def({ id: 921004371, name: "SetShopCountry", direc
 export const ShopData = def({ id: 1863710730, name: "ShopData", direction: "s2c", schema: [{ name: "payload", type: "string" }] });
 export const ShowPaymentWindow = def({ id: 1870342869, name: "ShowPaymentWindow", direction: "s2c", schema: [] });
 export const PurchasePresent = def({ id: -1518850075, name: "PurchasePresent", direction: "s2c", schema: [{ name: "itemId", type: "string" }, { name: "recipientId", type: "string" }, { name: "message", type: "string" }, { name: "quantity", type: "i32" }] });
+// Alerta de compra concluída (labels STRING_DONATION_ALERT_*). Compras em sequência ACUMULAM
+// (+=) na janela já aberta. Captura "750k + 7 dias": [150000, 225000, 375000, 7, img 6628]
+// (doubleCrystalBonus = soma dos outros dois quando o double está ativo). Zeros são omitidos
+// da janela (compra só de premium vem com os 3 primeiros zerados).
+export const ShowDonationAlert = def({ id: 1566424318, name: "ShowDonationAlert", direction: "s2c", schema: [
+    { name: "donatedCrystals", type: "i32" },
+    { name: "packageBonusCrystals", type: "i32" },
+    { name: "doubleCrystalBonusCrystals", type: "i32" },
+    { name: "premiumDays", type: "i32" },
+    { name: "image", type: "longPair" },
+] });

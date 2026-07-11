@@ -96,6 +96,9 @@ export const ValidateBattleNameResponse = def({
     schema: [{ name: "name", type: "string" }],
 });
 
+// Painel do usuário no lobby (proxy chama de "InitPanelPacket"). Verificado 1:1 contra o codec
+// do client. Quirks: durationCrystalAbonement = -1 quando sem abonement; o client faz place+=1
+// na leitura (envie 0-based); nickname vira uid/id no composite do client.
 export const LobbyData = def({
     id: 907073245,
     name: "LobbyData",
