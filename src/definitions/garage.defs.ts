@@ -6,7 +6,12 @@ export const GarageItems = def({ id: -255516505, name: "GarageItems", direction:
 export const MountItem = def({ id: 2062201643, name: "MountItem", direction: "s2c", schema: [{ name: "itemId", type: "string" }, { name: "owned", type: "bool" }] });
 export const FitItem = def({ id: 1091756732, name: "FitItem", direction: "c2s", schema: [{ name: "itemId", type: "string" }] });
 // Alerta de novos itens no garage (dialog "TEXT_GARAGE_NEW_ITEMS_ALERT"; clicar num item envia
-// OpenGarageAtItem). bool1/bool2/discount com nome de baixa confiança (sempre false/0 nas amostras).
+// OpenGarageAtItem). CONFIRMADO por amostra real: name = nome de exibição localizado
+// ("«Todo-Poderoso»", "Vespa"), price = preço em cristais (200/700/18350...), itemId = id de
+// garage ("almighty_m0", "wasp_m0"), modificationIndex m0/m1/m2 (-1 p/ paints/kits),
+// category/viewCategory = enums distintos, preview = resource id.
+// bool1/bool2/discount seguem NÃO confirmados (sempre false/0 nas amostras; hipótese do client:
+// um dos bools é "premium lock", discount = i32 de desconto — sem evidência empírica).
 export const NewItemsAlert = def({ id: -47424608, name: "NewItemsAlert", direction: "s2c", schema: [
     { name: "items", type: "list", of: [
         { name: "category", type: "i32" }, { name: "viewCategory", type: "i32" }, { name: "modificationIndex", type: "i32" },
