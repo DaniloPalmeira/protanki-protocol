@@ -133,6 +133,14 @@ export const BattleUserEffects = def({ id: 417965410, name: "BattleUserEffects",
 export const BonusData = def({ id: 228171466, name: "BonusData", direction: "s2c", schema: [{ name: "jsonData", type: "string" }] });
 export const InitBonuses = def({ id: 870278784, name: "InitBonuses", direction: "s2c", schema: [{ name: "jsonData", type: "string" }] });
 export const BonusRegions = def({ id: -959048700, name: "BonusRegions", direction: "s2c", schema: [{ name: "bonusRegionResources", type: "list", of: [{ name: "bonusResource", type: "resource" }, { name: "bonusType", type: "i32" }] }, { name: "bonusRegionData", type: "list", of: [{ name: "position", type: "object", of: VEC3_INLINE }, { name: "rotation", type: "object", of: VEC3_INLINE }, { name: "bonusType", type: "i32" }] }] });
+// Spawn/remove dinâmico de região de bônus (modelo 78, mesmo dispatcher do BonusRegions init).
+// A região é chaveada pela POSIÇÃO no client (remover exige o mesmo vetor do spawn).
+export const SpawnBonusRegion = def({ id: -915079427, name: "SpawnBonusRegion", direction: "s2c", schema: [
+    { name: "position", type: "vector3" }, { name: "rotation", type: "vector3" }, { name: "bonusType", type: "i32" },
+] });
+export const RemoveBonusRegion = def({ id: -1524095870, name: "RemoveBonusRegion", direction: "s2c", schema: [
+    { name: "position", type: "vector3" }, { name: "rotation", type: "vector3" }, { name: "bonusType", type: "i32" },
+] });
 export const InitBattleDM = def({ id: 930618015, name: "InitBattleDM", direction: "s2c", schema: [] });
 export const InitBattleTeam = def({ id: 183561709, name: "InitBattleTeam", direction: "s2c", schema: [] });
 export const InitBattleUsersDM = def({ id: -1959138292, name: "InitBattleUsersDM", direction: "s2c", schema: [{ name: "users", type: "list", of: BATTLE_USER_FIELDS }] });
@@ -153,6 +161,14 @@ export const BattleChatMessage = def({ id: 1259981343, name: "BattleChatMessage"
 export const BattleChatTeamMessage = def({ id: -449356094, name: "BattleChatTeamMessage", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "message", type: "string" }, { name: "team", type: "i32" }] });
 export const EnterBattle = def({ id: -1284211503, name: "EnterBattle", direction: "c2s", schema: [{ name: "battleTeam", type: "i32" }] });
 export const EquipmentNotAllowed = def({ id: -10847382, name: "EquipmentNotAllowed", direction: "s2c", schema: [{ name: "battleId", type: "string" }] });
+// Atualiza o rank de um jogador na tabela de estatísticas da batalha (e no label do tanque).
+export const SetPlayerRank = def({ id: 1262947513, name: "SetPlayerRank", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "rank", type: "i32" }] });
+// Painel de info da batalha no lobby (modelo 33): reinicia o cronômetro da rodada p/ o tempo cheio.
+export const RestartBattleTimer = def({ id: -344514517, name: "RestartBattleTimer", direction: "s2c", schema: [{ name: "battleId", type: "string" }] });
+// Atualiza o nome exibido da batalha no painel do lobby (amostra: "Остров CTF").
+export const UpdateBattleName = def({ id: 1561014187, name: "UpdateBattleName", direction: "s2c", schema: [{ name: "battleId", type: "string" }, { name: "name", type: "string" }] });
+// Alerta "BATTLE_ENTER_ERROR_EQUIPMENT_NOT_MATCH_CONSTRAINTS" ao tentar entrar.
+export const EquipmentConstraintsNotMatch = def({ id: 1229594925, name: "EquipmentConstraintsNotMatch", direction: "s2c", schema: [{ name: "battleId", type: "string" }] });
 export const BattleSystemMessage = def({ id: 606668848, name: "BattleSystemMessage", direction: "s2c", schema: [{ name: "message", type: "string" }] });
 export const BattleSpectatorMessage = def({ id: 1532749363, name: "BattleSpectatorMessage", direction: "s2c", schema: [{ name: "uid", type: "string" }, { name: "message", type: "string" }] });
 export const EnterBattleAsSpectator = def({ id: -1315002220, name: "EnterBattleAsSpectator", direction: "c2s", schema: [] });

@@ -7,6 +7,10 @@ export const PremiumNotifierData = def({ id: -2069508071, name: "PremiumNotifier
 export const ClanNotifierData = def({ id: -117055417, name: "ClanNotifierData", direction: "s2c", schema: [{ name: "inClan", type: "bool" }, { name: "clanTag", type: "string" }, { name: "nickname", type: "string" }] });
 // Codec manual no server (lista de i32 sem flag). Schema para o bridge.
 export const AchievementTips = def({ id: -1481254568, name: "AchievementTips", direction: "s2c", schema: [{ name: "achievementIds", type: "list", of: [{ name: "id", type: "i32" }] }] });
+// Notificação de conquista (modelo 67; enum 0..5 como i32). Amostra: id=1 + "Parabéns pela sua
+// primeira compra, tanker! 200 cristais são seus.".
+export const ShowAchievement = def({ id: 1765029653, name: "ShowAchievement", direction: "s2c", schema: [{ name: "achievementId", type: "i32" }, { name: "message", type: "string" }] });
+export const HideAchievement = def({ id: -907657573, name: "HideAchievement", direction: "s2c", schema: [{ name: "achievementId", type: "i32" }] });
 export const EmailInfo = def({ id: 613462801, name: "EmailInfo", direction: "s2c", schema: [{ name: "email", type: "string" }, { name: "emailConfirmed", type: "bool" }] });
 export const PremiumInfo = def({ id: 1405859779, name: "PremiumInfo", direction: "s2c", schema: [{ name: "needShowNotificationCompletionPremium", type: "bool" }, { name: "needShowWelcomeAlert", type: "bool" }, { name: "reminderCompletionPremiumTime", type: "f32" }, { name: "wasShowAlertForFirstPurchasePremium", type: "bool" }, { name: "wasShowReminderCompletionPremium", type: "bool" }, { name: "lifeTimeInSeconds", type: "i32" }] });
 export const UpdateCrystals = def({ id: -593513288, name: "UpdateCrystals", direction: "s2c", schema: [{ name: "crystals", type: "i32" }] });

@@ -11,6 +11,13 @@ export const RequestChangePasswordForm = def({ id: -1507635228, name: "RequestCh
 export const ChangePasswordForm = def({ id: 600420685, name: "ChangePasswordForm", direction: "s2c", schema: [] });
 export const CreatePasswordForm = def({ id: 133238100, name: "CreatePasswordForm", direction: "s2c", schema: [] });
 export const LinkEmailRequest = def({ id: -20486732, name: "LinkEmailRequest", direction: "c2s", schema: [{ name: "email", type: "string" }] });
+// Fluxo de credenciais do modelo 24: verifica a senha atual
+// (evento "AccountSettingsEventCheckPassword"); server responde Accept/Reject.
+export const CheckPassword = def({ id: -196636211, name: "CheckPassword", direction: "c2s", schema: [{ name: "password", type: "string" }] });
+export const CheckPasswordAccept = def({ id: 652872053, name: "CheckPasswordAccept", direction: "s2c", schema: [] });
+export const CheckPasswordReject = def({ id: 2029312880, name: "CheckPasswordReject", direction: "s2c", schema: [] });
+// Submissão login/e-mail + senha (após captcha) no form de vincular conta.
+export const LinkEmailWithPassword = def({ id: 668890771, name: "LinkEmailWithPassword", direction: "c2s", schema: [{ name: "login", type: "string" }, { name: "password", type: "string" }] });
 export const LinkAccountResultSuccess = def({ id: 2098576423, name: "LinkAccountResultSuccess", direction: "s2c", schema: [{ name: "identifier", type: "string" }] });
 export const LinkAccountResultError = def({ id: -541741971, name: "LinkAccountResultError", direction: "s2c", schema: [] });
 export const LinkAccountFailedAccountInUse = def({ id: -20513325, name: "LinkAccountFailedAccountInUse", direction: "s2c", schema: [{ name: "method", type: "string" }] });
