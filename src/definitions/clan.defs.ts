@@ -24,7 +24,10 @@ const LIGHT_CLAN_MODEL: PacketSchema = [
     { name: "name", type: "string" }, { name: "blockReason", type: "string" }, { name: "editable", type: "bool" }, { name: "tag", type: "string" },
     { name: "memberNicks", type: "stringArray" }, { name: "logo", type: "string" }, { name: "score", type: "i32" },
 ];
-// Modelo de 10 campos do membro (Long lastOnlineDate = i64).
+// Modelo de 10 campos do membro (Long lastOnlineDate = i64). `permission` é o enum de CARGO
+// (CodecClanPermission), ordinal 0..6: 0=SUPREME_COMMANDER (líder/fundador, gate do disband),
+// 1=COMMANDER, 2=OFFICER, 3=SERGEANT, 4=VETERAN, 5=PRIVATE, 6=NOVICE (default de novo membro).
+// Labels CLAN_POSITION_*. É o MESMO enum de SetClanMemberPosition.position.
 const MEMBER_MODEL: PacketSchema = [
     { name: "secondsInClan", type: "i32" }, { name: "deaths", type: "i32" }, { name: "kills", type: "i32" }, { name: "lastOnlineDate", type: "i64" },
     { name: "permission", type: "i32" }, { name: "score", type: "i32" }, { name: "nick", type: "string" },
@@ -32,9 +35,15 @@ const MEMBER_MODEL: PacketSchema = [
 ];
 
 export const KickClanMember = def({ id: 459991202, name: "KickClanMember", direction: "c2s", schema: USER });
+// position = enum de CARGO (CodecClanPermission, ordinal 0..6 CLAN_POSITION_*), o mesmo de
+// MEMBER_MODEL.permission — não é um i32 arbitrário. Serializa o ordinal (bytes de int).
 export const SetClanMemberPosition = def({ id: 90109270, name: "SetClanMemberPosition", direction: "c2s", schema: [{ name: "username", type: "string" }, { name: "position", type: "i32" }] });
 export const SetClanLogo = def({ id: 99387765, name: "SetClanLogo", direction: "c2s", schema: [{ name: "image", type: "bytes" }] });
 export const LeaveClan = def({ id: -1298483664, name: "LeaveClan", direction: "c2s", schema: [] });
+// flags = lista do enum de AÇÃO/direito (DISTINTO do cargo; ordinal 0..7) — os direitos que o
+// usuário tem no clã. Gates confirmados: 1=kick/gerenciar membros, 2=convidar, 3=gerenciar
+// pedidos de entrada, 7=editar clã/settings; 0/4/5/6 não confirmados. É o MESMO enum de
+// MyClanWindow.perms.
 export const ClanPermissions = def({ id: -453603415, name: "ClanPermissions", direction: "s2c", schema: [{ name: "flags", type: "list", of: [{ name: "flag", type: "i32" }] }] });
 export const ClanCooldown = def({ id: -745085341, name: "ClanCooldown", direction: "s2c", schema: [{ name: "seconds", type: "i32" }] });
 export const RemoveClanMember = def({ id: 1039356886, name: "RemoveClanMember", direction: "s2c", schema: USER });
