@@ -20,7 +20,7 @@ const NAME = fields([{ name: "name", type: "string" }]);
 // minRank, maxMembers, description...) é ignorado nesse fluxo e pode ir com defaults.
 const LIGHT_CLAN_MODEL: PacketSchema = [
     { name: "blocked", type: "bool" }, { name: "creationDate", type: "i64" }, { name: "founder", type: "string" }, { name: "description", type: "string" },
-    { name: "recruiting", type: "bool" }, { name: "maxDescriptionLength", type: "i32" }, { name: "maxMembers", type: "i32" }, { name: "minRank", type: "u8" },
+    { name: "recruiting", type: "bool" }, { name: "maxDescriptionLength", type: "i32" }, { name: "maxMembers", type: "i32" }, { name: "minRank", type: "i8" },
     { name: "name", type: "string" }, { name: "blockReason", type: "string" }, { name: "editable", type: "bool" }, { name: "tag", type: "string" },
     { name: "memberNicks", type: "stringArray" }, { name: "logo", type: "string" }, { name: "score", type: "i32" },
 ];
@@ -38,6 +38,8 @@ export const KickClanMember = def({ id: 459991202, name: "KickClanMember", direc
 // position = enum de CARGO (CodecClanPermission, ordinal 0..6 CLAN_POSITION_*), o mesmo de
 // MEMBER_MODEL.permission — não é um i32 arbitrário. Serializa o ordinal (bytes de int).
 export const SetClanMemberPosition = def({ id: 90109270, name: "SetClanMemberPosition", direction: "c2s", schema: [{ name: "username", type: "string" }, { name: "position", type: "i32" }] });
+// image = imagem do logo, int32-length + bytes crus (JPEG). CONFIRMADO por amostra: prefixo de
+// tamanho + magic ffd8ffe0. (NÃO é Vector<int> — o `bytes` decodifica com remaining 0.)
 export const SetClanLogo = def({ id: 99387765, name: "SetClanLogo", direction: "c2s", schema: [{ name: "image", type: "bytes" }] });
 export const LeaveClan = def({ id: -1298483664, name: "LeaveClan", direction: "c2s", schema: [] });
 // flags = lista do enum de AÇÃO/direito (DISTINTO do cargo; ordinal 0..7) — os direitos que o
@@ -71,7 +73,8 @@ export const CheckInviteUser = def({ id: 819097883, name: "CheckInviteUser", dir
 export const InviteUserValid = def({ id: 1796904481, name: "InviteUserValid", direction: "s2c", schema: [] });
 export const InviteUserInvalid = def({ id: -616439158, name: "InviteUserInvalid", direction: "s2c", schema: [] });
 export const SetClanDescription = def({ id: -1752335888, name: "SetClanDescription", direction: "both", schema: [{ name: "description", type: "string" }] });
-export const SetClanMinRank = def({ id: -1145619463, name: "SetClanMinRank", direction: "c2s", schema: [{ name: "minRank", type: "u8" }] });
+// minRank = byte ASSINADO (codec confirmado i8); -1 = sem mínimo.
+export const SetClanMinRank = def({ id: -1145619463, name: "SetClanMinRank", direction: "c2s", schema: [{ name: "minRank", type: "i8" }] });
 export const SetClanRecruiting = def({ id: -614563927, name: "SetClanRecruiting", direction: "c2s", schema: [{ name: "recruiting", type: "bool" }] });
 export const SendClanInvite = def({ id: -2053489715, name: "SendClanInvite", direction: "c2s", schema: USER });
 export const ClanInviteSentAck = def({ id: 1921140979, name: "ClanInviteSentAck", direction: "s2c", schema: USER });
@@ -135,7 +138,7 @@ export const ShowForeignClanWindow = def({ id: -1855118498, name: "ShowForeignCl
     // aparece com true/false em sessões diferentes) — provável "você já está em um clã".
     { name: "joinHidden", type: "bool" },
     // Rank mínimo p/ pedir entrada (byte assinado; -1 = sem mínimo, como nos outros models).
-    { name: "minRank", type: "u8" },
+    { name: "minRank", type: "i8" },
     { name: "name", type: "string" },
     // Mensagem exibida quando blocked=true (slot do CLAN_BLOCK).
     { name: "blockReason", type: "string" },
