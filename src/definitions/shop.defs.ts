@@ -5,9 +5,12 @@ export const LocalizationInfo = def({ id: -1232334539, name: "LocalizationInfo",
 export const RequestPaymentWindow = def({ id: -296048697, name: "RequestPaymentWindow", direction: "c2s", schema: [] });
 export const RequestShopData = def({ id: 1153801756, name: "RequestShopData", direction: "c2s", schema: [] });
 export const SetShopCountry = def({ id: 921004371, name: "SetShopCountry", direction: "c2s", schema: [{ name: "countryCode", type: "string" }] });
-export const ShopData = def({ id: 1863710730, name: "ShopData", direction: "s2c", schema: [{ name: "payload", type: "string" }] });
+// Conteúdo passa por JSON.parse no client → jsonData (consistente com GarageItems/ShopItems).
+export const ShopData = def({ id: 1863710730, name: "ShopData", direction: "s2c", schema: [{ name: "jsonData", type: "string" }] });
 export const ShowPaymentWindow = def({ id: 1870342869, name: "ShowPaymentWindow", direction: "s2c", schema: [] });
-export const PurchasePresent = def({ id: -1518850075, name: "PurchasePresent", direction: "s2c", schema: [{ name: "itemId", type: "string" }, { name: "recipientId", type: "string" }, { name: "message", type: "string" }, { name: "quantity", type: "i32" }] });
+// c2s: jogador ENVIA um presente (dialog de presente). Ordem do sender: uid do destinatário,
+// nome do item, mensagem, quantidade. (Era s2c com os 2 primeiros campos invertidos.)
+export const PurchasePresent = def({ id: -1518850075, name: "PurchasePresent", direction: "c2s", schema: [{ name: "recipientUid", type: "string" }, { name: "itemName", type: "string" }, { name: "message", type: "string" }, { name: "quantity", type: "i32" }] });
 // Compra de item da loja com método de pagamento escolhido (janela pós "ShopItemChosenEVENT").
 // Amostra: ("crystalls_pack_1", "cryptomus").
 export const PurchaseShopItem = def({ id: 880756819, name: "PurchaseShopItem", direction: "c2s", schema: [{ name: "itemId", type: "string" }, { name: "paymentMethod", type: "string" }] });
