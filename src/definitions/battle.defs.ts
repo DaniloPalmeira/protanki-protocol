@@ -160,15 +160,18 @@ export const WeaponPhysics = def({ id: -2124388778, name: "WeaponPhysics", direc
 export const BattleChatMessage = def({ id: 1259981343, name: "BattleChatMessage", direction: "both", schema: [{ name: "nickname", type: "string" }, { name: "message", type: "string" }, { name: "team", type: "i32" }] });
 export const BattleChatTeamMessage = def({ id: -449356094, name: "BattleChatTeamMessage", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "message", type: "string" }, { name: "team", type: "i32" }] });
 export const EnterBattle = def({ id: -1284211503, name: "EnterBattle", direction: "c2s", schema: [{ name: "battleTeam", type: "i32" }] });
-export const EquipmentNotAllowed = def({ id: -10847382, name: "EquipmentNotAllowed", direction: "s2c", schema: [{ name: "battleId", type: "string" }] });
+// Erro "equipamento não bate com as restrições da sala" — variante TEAM (modelo de batalha por
+// times). Mostra o MESMO alerta "BATTLE_ENTER_ERROR_EQUIPMENT_NOT_MATCH_CONSTRAINTS" que a
+// variante DM abaixo; o server escolhe o id pelo modo da batalha selecionada (DM vs Team).
+export const EquipmentConstraintsNotMatchTeam = def({ id: -10847382, name: "EquipmentConstraintsNotMatchTeam", direction: "s2c", schema: [{ name: "battleId", type: "string" }] });
 // Atualiza o rank de um jogador na tabela de estatísticas da batalha (e no label do tanque).
 export const SetPlayerRank = def({ id: 1262947513, name: "SetPlayerRank", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "rank", type: "i32" }] });
 // Painel de info da batalha no lobby (modelo 33): reinicia o cronômetro da rodada p/ o tempo cheio.
 export const RestartBattleTimer = def({ id: -344514517, name: "RestartBattleTimer", direction: "s2c", schema: [{ name: "battleId", type: "string" }] });
 // Atualiza o nome exibido da batalha no painel do lobby (amostra: "Остров CTF").
 export const UpdateBattleName = def({ id: 1561014187, name: "UpdateBattleName", direction: "s2c", schema: [{ name: "battleId", type: "string" }, { name: "name", type: "string" }] });
-// Alerta "BATTLE_ENTER_ERROR_EQUIPMENT_NOT_MATCH_CONSTRAINTS" ao tentar entrar.
-export const EquipmentConstraintsNotMatch = def({ id: 1229594925, name: "EquipmentConstraintsNotMatch", direction: "s2c", schema: [{ name: "battleId", type: "string" }] });
+// Mesmo erro, variante DM (modelo de deathmatch). Alerta "BATTLE_ENTER_ERROR_EQUIPMENT_NOT_MATCH_CONSTRAINTS".
+export const EquipmentConstraintsNotMatchDm = def({ id: 1229594925, name: "EquipmentConstraintsNotMatchDm", direction: "s2c", schema: [{ name: "battleId", type: "string" }] });
 export const BattleSystemMessage = def({ id: 606668848, name: "BattleSystemMessage", direction: "s2c", schema: [{ name: "message", type: "string" }] });
 export const BattleSpectatorMessage = def({ id: 1532749363, name: "BattleSpectatorMessage", direction: "s2c", schema: [{ name: "uid", type: "string" }, { name: "message", type: "string" }] });
 export const EnterBattleAsSpectator = def({ id: -1315002220, name: "EnterBattleAsSpectator", direction: "c2s", schema: [] });
