@@ -187,7 +187,17 @@ export const UserConnectDM = def({ id: 862913394, name: "UserConnectDM", directi
 export const UserConnectTeam = def({ id: 2040021062, name: "UserConnectTeam", direction: "s2c", schema: [{ name: "nickname", type: "string" }, { name: "usersInfo", type: "list", of: USER_CONNECT_ENTRY }, { name: "team", type: "i32" }] });
 export const UserDisconnectedDm = def({ id: -1689876764, name: "UserDisconnectedDm", direction: "s2c", schema: [{ name: "nickname", type: "string" }] });
 export const SendBattleInvite = def({ id: -864265623, name: "SendBattleInvite", direction: "c2s", schema: [{ name: "targetNickname", type: "string" }, { name: "battleId", type: "string" }] });
-export const ShowBattleInvite = def({ id: 810713262, name: "ShowBattleInvite", direction: "s2c", schema: [{ name: "inviterNickname", type: "string" }, { name: "flag1", type: "bool" }, { name: "flag2", type: "bool" }, { name: "battleId", type: "string" }, { name: "battleName", type: "string" }, { name: "battleMode", type: "i32" }, { name: "flag3", type: "bool" }, { name: "flag4", type: "bool" }] });
+// Convite de batalha ("X convida você p/ uma batalha"). No client é {inviterNickname, data:composite}.
+// Semântica dos campos confirmada pela view do convite (locale STRING_*):
+//   availableAtYourRank: false → "STRING_BATTLE_IS_UNAVAILABLE_AT_YOUR_RANK_LABEL"
+//   hasFreeSlots: dentro de availableAtYourRank, true→"THERE_ARE_PLACES_AVAILABLE" / false→"NO_PLACES"
+//   mapName: exibido como "<mapa> <modo>" (amostra: "Ilha") — era "battleName", é NOME DE MAPA
+//   battleMode: enum CodecBattleMode (ordinal como i32)
+//   showIcon (ex-flag3): controla um ícone no alerta do convite — semântica não confirmada
+//   privateBattle (ex-flag4): não lido na view do convite; nome por reuso do descritor de batalha (média)
+// (O composite tem 2 campos extras hardcoded no client — serverNumber=1 e um bool=false — que NÃO
+//  vão no fio, corretamente ausentes aqui.)
+export const ShowBattleInvite = def({ id: 810713262, name: "ShowBattleInvite", direction: "s2c", schema: [{ name: "inviterNickname", type: "string" }, { name: "availableAtYourRank", type: "bool" }, { name: "hasFreeSlots", type: "bool" }, { name: "battleId", type: "string" }, { name: "mapName", type: "string" }, { name: "battleMode", type: "i32" }, { name: "showIcon", type: "bool" }, { name: "privateBattle", type: "bool" }] });
 export const DeclineBattleInvite = def({ id: 1152865919, name: "DeclineBattleInvite", direction: "c2s", schema: [{ name: "inviterNickname", type: "string" }] });
 export const BattleInviteDeclined = def({ id: 1015650019, name: "BattleInviteDeclined", direction: "s2c", schema: [{ name: "targetNickname", type: "string" }] });
 export const AcceptBattleInvite = def({ id: 814687528, name: "AcceptBattleInvite", direction: "c2s", schema: [{ name: "inviterNickname", type: "string" }] });
